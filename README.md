@@ -79,11 +79,11 @@ Prerequisites
    - cd server
    - npm install
    - npm start
-   - # Server running at http://localhost:5000
+   - Server running at http://localhost:5000
 2. Start the AI Sidecar
-   - # In a new terminal
+   - In a new terminal
    - pip install -r requirements.txt
-   - # Create a .env file with your OPENAI_API_KEY
+   - Create a .env file with your OPENAI_API_KEY
    - python backend.py
 3. Usage
    - Log in to the EHR Simulator (doctor1 / password).
