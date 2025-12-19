@@ -27,21 +27,21 @@ Key Features
   - The AI processes anonymized clinical text only. The UI re-attaches patient identity locally.
   
   System Architecture.
-  The solution uses a "Twin Architecture" to bridge 1990s legacy protocols with modern AI.
+  - The solution uses a "Twin Architecture" to bridge 1990s legacy protocols with modern AI.
   
-  graph LR
-    A[Physician] -->|Opens Patient| B[Local EHR Simulator]
-    B -->|Writes GDT File| C{Shared Folder}
-    C -->|Watchdog Event| D[Python Bridge]
+         graph LR
+        A[Physician] -->|Opens Patient| B[Local EHR Simulator]
+        B -->|Writes GDT File| C{Shared Folder}
+        C -->|Watchdog Event| D[Python Bridge]
     
-    subgraph "The Intelligence Engine"
-    D -->|Local Check| E[Safety Rules]
-    D -->|Anonymize| F[OpenAI API]
-    end
+        subgraph "The Intelligence Engine"
+        D -->|Local Check| E[Safety Rules]
+        D -->|Anonymize| F[OpenAI API]
+        end
     
-    E --> G[Sidecar UI]
-    F -->|Summary JSON| G
-    G -->|Display| A
+        E --> G[Sidecar UI]
+        F -->|Summary JSON| G
+        G -->|Display| A
     
 1. The Simulator (Node.js/Express)
    - Acts as the "Legacy PVS" (Practice Management System).
