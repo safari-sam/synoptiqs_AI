@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix server start",
+    "dev": "npm --prefix server run dev",
+    "install:server": "node scripts/install-server.js",
+    "postinstall": "node scripts/install-server.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.15.3"
+  }
+}

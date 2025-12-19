@@ -1,0 +1,38 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Dependencies
+node_modules/
+server/node_modules/
+package-lock.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+server/data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Exports and temporary files
+server/exports/
+server/C/
+*.bdt
+*.gdt

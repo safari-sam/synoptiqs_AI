@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR Information System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" onclick="showPage('home')">
+                <i class="bi bi-heart-pulse-fill"></i> MediCare EHR
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('home')">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('about-ehr')">About EHR</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('about-us')">About Us</a>
+                    </li>
+                    <li class="nav-item" id="dashboard-nav" style="display:none;">
+                        <a class="nav-link" href="#" onclick="showPage('dashboard')">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="summary-nav" style="display:none;">
+                        <a class="nav-link" href="#" onclick="showPage('summary')">Visit Summaries</a>
+                    </li>
+                    <li class="nav-item" id="lab-dashboard-nav" style="display:none;">
+                        <a class="nav-link" href="#" onclick="showPage('lab-dashboard')">Lab Dashboard</a>
+                    </li>
+
+                </ul>
+                <ul class="navbar-nav" id="auth-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('login')">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPage('register')">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
+                    <li class="nav-item" id="lab-auth-link">
+                        <a class="nav-link" href="#" onclick="showPage('lab-login')">
+                            <i class="bi bi-flask"></i> Lab Portal
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="user-nav" style="display:none;">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <span id="user-name">Dr. Smith</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Page -->
+        <div id="home" class="page-section active">
+            <div class="hero-section">
+                <div class="container text-center">
+                    <h1 class="display-3 fw-bold">
+                        <i class="bi bi-heart-pulse"></i> Electronic Health Records
+                    </h1>
+                    <p class="lead mt-3">Comprehensive Patient Care Management System</p>
+                    <p>Secure • Efficient • Professional</p>
+                    <button class="btn btn-light btn-lg mt-3" onclick="showPage('register')">
+                        Get Started <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        <i class="bi bi-shield-check feature-icon"></i>
+                        <h3 class="mt-3">Secure & Compliant</h3>
+                        <p>HIPAA-compliant data protection with advanced encryption</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <i class="bi bi-lightning-charge feature-icon"></i>
+                        <h3 class="mt-3">Fast Access</h3>
+                        <p>Instant access to complete patient medical records</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <i class="bi bi-graph-up feature-icon"></i>
+                        <h3 class="mt-3">Complete Workflow</h3>
+                        <p>Full clinical documentation from visit to treatment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About EHR Page -->
+        <div id="about-ehr" class="page-section">
+            <div class="container">
+                <h1 class="mb-4"><i class="bi bi-info-circle"></i> About Electronic Health Records</h1>
+                <div class="card">
+                    <div class="card-body">
+                        <h3>What is an EHR?</h3>
+                        <p>An Electronic Health Record (EHR) is a comprehensive digital version of a patient's medical history. It provides real-time, patient-centered records accessible instantly to authorized healthcare providers.</p>
+                        
+                        <h3 class="mt-4">Clinical Benefits</h3>
+                        <ul>
+                            <li><strong>Improved Patient Care:</strong> Instant access to complete medical history enables better clinical decisions</li>
+                            <li><strong>Enhanced Coordination:</strong> Seamless information sharing among healthcare team members</li>
+                            <li><strong>Reduced Errors:</strong> Automated alerts for drug interactions and allergies</li>
+                            <li><strong>Efficient Workflow:</strong> Streamlined documentation and reduced paperwork</li>
+                            <li><strong>Better Outcomes:</strong> Data-driven insights for evidence-based medicine</li>
+                        </ul>
+                        
+                        <h3 class="mt-4">System Components</h3>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Patient Demographics & Biography</li>
+                                    <li>Medical History & Chronic Conditions</li>
+                                    <li>Current Medications & Allergies</li>
+                                    <li>Visit Documentation & Chief Complaints</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Physical Examination Records</li>
+                                    <li>Laboratory & Radiology Results</li>
+                                    <li>Diagnosis & Treatment Plans</li>
+                                    <li>Prescription Management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Page -->
+        <div id="about-us" class="page-section">
+            <div class="container">
+                <h1 class="mb-4"><i class="bi bi-building"></i> About Us</h1>
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Our Mission</h3>
+                        <p>To empower healthcare professionals with innovative technology that enhances patient care quality, improves clinical efficiency, and supports evidence-based medical practice.</p>
+                        
+                        <h3 class="mt-4">Our Vision</h3>
+                        <p>To be the trusted partner in healthcare digital transformation, providing intuitive and comprehensive EHR solutions that adapt to evolving clinical needs.</p>
+                        
+                        <h3 class="mt-4">Contact Information</h3>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><i class="bi bi-envelope-fill text-primary"></i> <strong>Email:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d6e686d6d726f695d707879747e7c6f783078756f337e7270">[email&#160;protected]</a></p>
+                                <p><i class="bi bi-telephone-fill text-primary"></i> <strong>Phone:</strong> +1 (555) 123-4567</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><i class="bi bi-geo-alt-fill text-primary"></i> <strong>Address:</strong> 123 Healthcare Ave, Medical District, MC 12345</p>
+                                <p><i class="bi bi-clock-fill text-primary"></i> <strong>Support:</strong> 24/7 Technical Assistance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="login" class="page-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Doctor Login</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success" id="login-success">
+                                    <i class="bi bi-check-circle"></i> Login successful!
+                                </div>
+                                <div class="alert alert-danger" id="login-error">
+                                    <i class="bi bi-exclamation-triangle"></i> Invalid credentials!
+                                </div>
+                                
+                                <form id="login-form" onsubmit="return handleLogin(event)">
+                                    <div class="mb-3">
+                                        <label for="login-email" class="form-label">
+                                            <i class="bi bi-envelope"></i> Email Address
+                                        </label>
+                                        <input type="email" class="form-control" id="login-email" placeholder="doctor@hospital.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="login-password" class="form-label">
+                                            <i class="bi bi-key"></i> Password
+                                        </label>
+                                        <input type="password" class="form-control" id="login-password" placeholder="Enter your password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <a href="#" onclick="showPage('forgot-password')">Forgot Password?</a>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-box-arrow-in-right"></i> Login
+                                    </button>
+                                </form>
+                                <div class="mt-3 text-center">
+                                    <p>New doctor? <a href="#" onclick="showPage('register')">Register here</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="register" class="page-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Doctor Registration</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success" id="register-success" style="display:none;">
+                                    <i class="bi bi-check-circle"></i> Registration successful! Please check your email for confirmation.
+                                </div>
+                                <div class="alert alert-danger" id="register-error" style="display:none;"></div>
+                                
+                                <form id="register-form" onsubmit="return handleRegister(event)">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reg-firstname" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="reg-firstname" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reg-lastname" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="reg-lastname" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reg-email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="reg-email" required>
+                                        <small class="form-text text-muted">Confirmation email will be sent</small>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reg-license" class="form-label">Medical License Number</label>
+                                            <input type="text" class="form-control" id="reg-license" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reg-specialty" class="form-label">Specialty</label>
+                                            <input type="text" class="form-control" id="reg-specialty" placeholder="e.g., Internal Medicine" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reg-password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="reg-password" required>
+                                        <small class="form-text text-muted">
+                                            Minimum 8 characters with uppercase, lowercase, number, and special character
+                                        </small>
+                                        <div id="password-strength" class="mt-2"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reg-confirm-password" class="form-label">Confirm Password</label>
+                                        <input type="password" class="form-control" id="reg-confirm-password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-person-check"></i> Register
+                                    </button>
+                                </form>
+                                <div class="mt-3 text-center">
+                                    <p>Already registered? <a href="#" onclick="showPage('login')">Login here</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lab Portal Page -->
+        <div id="lab-login" class="page-section">
+            <div class="container">
+                <div class="text-center mb-4">
+                    <h1 class="mb-1"><i class="bi bi-flask"></i> Lab Technician Access</h1>
+                    <p class="text-muted">Manage diagnostic requests and deliver verified results securely.</p>
+                </div>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header text-center">
+                                <h5 class="mb-0"><i class="bi bi-door-open"></i> Lab Login</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success" id="lab-login-success" style="display:none;"></div>
+                                <div class="alert alert-danger" id="lab-login-error" style="display:none;"></div>
+                                <form id="lab-login-form">
+                                    <div class="mb-3">
+                                        <label for="lab-login-email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="lab-login-email" placeholder="technician@lab.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="lab-login-password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="lab-login-password" placeholder="Enter your password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                                    </button>
+                                </form>
+                                <div class="mt-3 text-center small">
+                                    <a href="#" onclick="showPage('login')">Doctor login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header text-center">
+                                <h5 class="mb-0"><i class="bi bi-person-plus"></i> Lab Registration</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small">Only authorized administrators should provision new lab accounts.</p>
+                                <div class="alert alert-success" id="lab-register-success" style="display:none;"></div>
+                                <div class="alert alert-danger" id="lab-register-error" style="display:none;"></div>
+                                <form id="lab-register-form">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lab-reg-firstname" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="lab-reg-firstname" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lab-reg-lastname" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="lab-reg-lastname" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="lab-reg-email" class="form-label">Work Email</label>
+                                        <input type="email" class="form-control" id="lab-reg-email" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lab-reg-password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="lab-reg-password" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lab-reg-confirm-password" class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control" id="lab-reg-confirm-password" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        <i class="bi bi-person-check"></i> Create Lab Account
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forgot Password Page -->
+        <div id="forgot-password" class="page-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h4 class="mb-0"><i class="bi bi-key"></i> Reset Password</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success" id="forgot-success">
+                                    <i class="bi bi-envelope-check"></i> Password reset email sent!
+                                </div>
+                                
+                                <form id="forgot-form" onsubmit="return handleForgotPassword(event)">
+                                    <div class="mb-3">
+                                        <label for="forgot-email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="forgot-email" required>
+                                        <small class="form-text text-muted">Enter your registered email</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-send"></i> Send Reset Link
+                                    </button>
+                                </form>
+                                <div class="mt-3 text-center">
+                                    <a href="#" onclick="showPage('login')">
+                                        <i class="bi bi-arrow-left"></i> Back to Login
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page-section">
+            <div class="container-fluid">
+                <h2 class="mb-4">
+                    <i class="bi bi-speedometer2"></i> Doctor Dashboard
+                </h2>
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div id="total-patients-card" class="card stat-card clickable-card" role="button" tabindex="0">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title text-muted">Total Patients</h6>
+                                        <h2 class="text-primary mb-0"><span id="stat-total-patients">0</span></h2>
+                                    </div>
+                                    <i class="bi bi-people-fill" style="font-size: 2.5rem; color: var(--primary-color); opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card stat-card" style="border-left-color: var(--success-color);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title text-muted">Active Cases</h6>
+                                        <h2 class="mb-0" style="color: var(--success-color);"><span id="stat-active-cases">0</span></h2>
+                                    </div>
+                                    <i class="bi bi-clipboard-check-fill" style="font-size: 2.5rem; color: var(--success-color); opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card stat-card" style="border-left-color: var(--warning-color);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title text-muted">Pending Reviews</h6>
+                                        <h2 class="mb-0" style="color: var(--warning-color);"><span id="stat-pending-reviews">0</span></h2>
+                                    </div>
+                                    <i class="bi bi-hourglass-split" style="font-size: 2.5rem; color: var(--warning-color); opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card stat-card" style="border-left-color: var(--secondary-light);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title text-muted">In Queue</h6>
+                                        <h2 class="mb-0" style="color: var(--secondary-light);"><span id="stat-queue-count">0</span></h2>
+                                    </div>
+                                    <i class="bi bi-clock-history" style="font-size: 2.5rem; color: var(--secondary-light); opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Queue -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-task"></i> Patients in Queue
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="queue-empty" class="text-muted">No patients currently in queue.</div>
+                        <div id="queue-container" class="row g-3"></div>
+                    </div>
+                </div>
+
+                <!-- My Patients List -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-lines-fill"></i> My Patients
+                        </h5>
+                        <button class="btn btn-sm btn-primary" type="button" onclick="openPatientModal()">
+                            <i class="bi bi-person-plus"></i> Add Patient
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="patients-empty" class="text-muted" style="display:none;">No patients registered yet.</div>
+                        <div id="patients-container" class="row g-3"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Visit Summaries Page -->
+        <!-- Lab Dashboard Page -->
+        <div id="lab-dashboard" class="page-section">
+            <div class="container-fluid">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+                    <div>
+                        <h2 class="mb-1"><i class="bi bi-beaker"></i> Lab Technician Workspace</h2>
+                        <p class="text-muted mb-0">Review diagnostic requests, capture results, and verify delivery.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="lab-status-filter" class="form-label mb-0 me-1 small text-muted">Status</label>
+                        <select id="lab-status-filter" class="form-select form-select-sm" style="width: 140px;">
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="all">All</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="lab-refresh-button">
+                            <i class="bi bi-arrow-repeat"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <p id="lab-status-message" class="small text-muted" style="display:none;"></p>
+                <div class="row">
+                    <div class="col-lg-4 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-inbox"></i> Request Queue</h5>
+                            </div>
+                            <div class="list-group list-group-flush" id="lab-orders-queue">
+                                <div class="p-3 text-muted small">No lab requests to display.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-1" id="lab-order-title">Select an order</h5>
+                                    <span class="badge bg-secondary" id="lab-order-status"></span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="lab-order-alert" style="display:none;"></div>
+                                <div id="lab-order-body" class="text-muted">
+                                    Select a lab request from the queue to view details and submit findings.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="summary" class="page-section">
+            <div class="container">
+                <h2 class="mb-4">
+                    <i class="bi bi-journal-medical"></i> Visit Summaries
+                </h2>
+                <div id="summary-empty" class="alert alert-info" style="display:none;">
+                    No patients available. Register a patient to start documenting visit summaries.
+                </div>
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="summary-patient-select" class="form-label">Patient</label>
+                                <select id="summary-patient-select" class="form-select"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="summary-visit-select" class="form-label">Visit</label>
+                                <select id="summary-visit-select" class="form-select"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="summary-meta">
+                                    <div><strong>Date:</strong> <span id="summary-visit-date">—</span></div>
+                                    <div><strong>Status:</strong> <span id="summary-visit-status">—</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="summary-context mt-3">
+                            <div><strong>Diagnosis:</strong> <span id="summary-visit-diagnosis">—</span></div>
+                            <div class="mt-1"><strong>Plan:</strong> <span id="summary-visit-plan">—</span></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="summary-text" class="form-label">Doctor's Summary</label>
+                            <textarea id="summary-text" class="form-control" rows="6" placeholder="Diagnosis: ...&#10;Plan: ...&#10;Progress: ..."></textarea>
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-primary" id="summary-save-button">
+                                <i class="bi bi-save"></i> Save Summary
+                            </button>
+                            <button class="btn btn-outline-secondary" id="summary-reset-button">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+                        <div id="summary-status" class="small mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="card summary-preview-card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-eye"></i> Saved Summary Preview</h5>
+                        <span id="summary-last-updated" class="text-muted small"></span>
+                    </div>
+                    <div class="card-body">
+                        <div id="summary-preview" class="summary-preview text-muted">
+                            Select a patient visit to review or capture the summary.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clinical View Page -->
+        <div id="clinical-view" class="page-section">
+            <div class="container-fluid">
+                <!-- Patient Header -->
+                <div class="patient-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3><i class="bi bi-person-badge"></i> <span id="clinical-patient-name">Patient Name</span></h3>
+                            <div class="patient-meta">
+                                <span><i class="bi bi-hash"></i> <span id="clinical-patient-id">P001</span></span>
+                                <span><i class="bi bi-calendar"></i> <span id="clinical-patient-age">45 years</span></span>
+                                <span><i class="bi bi-gender-ambiguous"></i> <span id="clinical-patient-gender">Male</span></span>
+                                <span><i class="bi bi-droplet-fill"></i> <span id="clinical-patient-blood">A+</span></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-light" onclick="showPage('dashboard')">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clinical Tabs Navigation -->
+                <div class="clinical-tabs">
+                    <button class="clinical-tab active" data-tab="profile" onclick="switchClinicalTab('profile')">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </button>
+                    <button class="clinical-tab" data-tab="visit" onclick="switchClinicalTab('visit')">
+                        <i class="bi bi-clipboard-pulse"></i> Current Visit
+                    </button>
+                    <button class="clinical-tab" data-tab="reason-for-visit" onclick="switchClinicalTab('reason-for-visit')">
+                        <i class="bi bi-journal-text"></i> Reason for Visit
+                    </button>
+                    <button class="clinical-tab" data-tab="investigations" onclick="switchClinicalTab('investigations')">
+                        <i class="bi bi-clipboard2-data"></i> Investigations
+                    </button>
+                    <button class="clinical-tab" data-tab="diagnosis" onclick="switchClinicalTab('diagnosis')">
+                        <i class="bi bi-journal-medical"></i> Diagnosis & Management
+                    </button>
+                    <button class="clinical-tab" data-tab="medications" onclick="switchClinicalTab('medications')">
+                        <i class="bi bi-prescription2"></i> Medications
+                    </button>
+                    <button class="clinical-tab" data-tab="appointment" onclick="switchClinicalTab('appointment')">
+                        <i class="bi bi-calendar-check"></i> Next Appointment
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                
+                <!-- Profile Tab -->
+                <div id="tab-profile" class="tab-content-section active">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-person-vcard"></i> Personal Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Full Name:</strong></div>
+                                        <div class="col-8" id="profile-name">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Date of Birth:</strong></div>
+                                        <div class="col-8" id="profile-dob">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Age:</strong></div>
+                                        <div class="col-8" id="profile-age">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Gender:</strong></div>
+                                        <div class="col-8" id="profile-gender">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Blood Type:</strong></div>
+                                        <div class="col-8" id="profile-blood">A+</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Weight:</strong></div>
+                                        <div class="col-8" id="profile-weight">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Height:</strong></div>
+                                        <div class="col-8" id="profile-height">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-telephone"></i> Contact Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Phone:</strong></div>
+                                        <div class="col-8" id="profile-phone">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Email:</strong></div>
+                                        <div class="col-8" id="profile-email">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Address:</strong></div>
+                                        <div class="col-8" id="profile-address">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Emergency Contact:</strong></div>
+                                        <div class="col-8" id="profile-emergency">—</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Insurance:</strong></div>
+                                        <div class="col-8" id="profile-insurance">—</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-heart-pulse"></i> Medical Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="text-primary">Allergies</h6>
+                                    <p id="profile-allergies">—</p>
+                                    
+                                    <h6 class="text-primary mt-3">Chronic Conditions</h6>
+                                    <p id="profile-conditions">—</p>
+                                    
+                                    <h6 class="text-primary mt-3">Current Medications</h6>
+                                    <p id="profile-current-meds">—</p>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Visit Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Last Visit:</strong> <span id="profile-last-visit-date">—</span></p>
+                                    <p><strong>Chief Complaint:</strong> <span id="profile-last-visit-complaint">—</span></p>
+                                    <p><strong>Diagnosis:</strong> <span id="profile-last-visit-diagnosis">—</span></p>
+                                    <p><strong>Next Appointment:</strong> <span id="profile-next-appointment">—</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Visit Tab -->
+                <div id="tab-visit" class="tab-content-section">
+                    <!-- Visit History Button -->
+                    <div class="mb-3">
+                        <button class="btn btn-secondary" onclick="viewFullHistory()">
+                            <i class="bi bi-journal-text"></i> View Complete Patient History
+                        </button>
+                    </div>
+
+                    <!-- Previous History Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Visit Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="history-summary" class="history-timeline">
+                                <p class="text-muted">Loading history...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full History Modal Section (hidden by default) -->
+                    <div id="full-history-section" style="display:none;" class="card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-journal-medical"></i> Complete Patient History</h5>
+                                <button class="btn btn-sm btn-light" onclick="closeFullHistory()">
+                                    <i class="bi bi-x-lg"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="full-history-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- Current Visit Entry -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-thermometer"></i> Vital Signs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Temperature (°C)</label>
+                                    <input type="number" step="0.1" class="form-control" id="vitals-temp" placeholder="37.0">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Blood Pressure (mmHg)</label>
+                                    <input type="text" class="form-control" id="vitals-bp" placeholder="120/80">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Heart Rate (bpm)</label>
+                                    <input type="number" class="form-control" id="vitals-pulse" placeholder="72">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Respiratory Rate (/min)</label>
+                                    <input type="number" class="form-control" id="vitals-resp" placeholder="16">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">SpO2 (%)</label>
+                                    <input type="number" class="form-control" id="vitals-o2" placeholder="98">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Weight (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" id="vitals-weight" placeholder="70.5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Chief Complaint</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control" id="chief-complaint" rows="2" placeholder="Enter patient's chief complaint..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-file-text"></i> History of Present Illness (HPI)</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control" id="hpi" rows="4" placeholder="Detailed history of present illness..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-list-check"></i> Review of Systems</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="system-review-item mb-3">
+                                        <h6>Cardiovascular</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Chest pain, palpitations, edema..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Respiratory</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Cough, shortness of breath, wheezing..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Gastrointestinal</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Nausea, vomiting, diarrhea, abdominal pain..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Neurological</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Headache, dizziness, seizures, weakness..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="system-review-item mb-3">
+                                        <h6>Musculoskeletal</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Joint pain, muscle weakness, stiffness..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Genitourinary</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Urinary frequency, dysuria, hematuria..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Skin</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Rash, itching, lesions, changes..."></textarea>
+                                    </div>
+                                    <div class="system-review-item mb-3">
+                                        <h6>Endocrine</h6>
+                                        <textarea class="form-control" rows="2" placeholder="Polyuria, polydipsia, weight changes..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-stethoscope"></i> Physical Examination</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="exam-grid">
+                                <div class="exam-item">
+                                    <i class="bi bi-eye"></i>
+                                    <h6>HEENT</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Head, eyes, ears, nose, throat..."></textarea>
+                                </div>
+                                <div class="exam-item">
+                                    <i class="bi bi-lungs"></i>
+                                    <h6>Chest/Lungs</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Respiratory examination..."></textarea>
+                                </div>
+                                <div class="exam-item">
+                                    <i class="bi bi-heart"></i>
+                                    <h6>Cardiovascular</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Heart sounds, rhythm..."></textarea>
+                                </div>
+                                <div class="exam-item">
+                                    <i class="bi bi-shield-fill-plus"></i>
+                                    <h6>Abdomen</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Inspection, palpation, percussion..."></textarea>
+                                </div>
+                                <div class="exam-item">
+                                    <i class="bi bi-columns-gap"></i>
+                                    <h6>Extremities</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Upper and lower extremities..."></textarea>
+                                </div>
+                                <div class="exam-item">
+                                    <i class="bi bi-lightning"></i>
+                                    <h6>Neurological</h6>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Mental status, reflexes, motor, sensory..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-primary btn-lg" onclick="saveVisitEntry()">
+                            <i class="bi bi-save"></i> Save Visit Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reason for Visit Tab -->
+                <div id="tab-reason-for-visit" class="tab-content-section">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-journal-text"></i> Reason for Visit</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Primary Reason for Visit</label>
+                                    <select class="form-select" id="primary-reason">
+                                        <option value="">Select primary reason...</option>
+                                        <option value="routine-checkup">Routine Check-up</option>
+                                        <option value="follow-up">Follow-up Appointment</option>
+                                        <option value="acute-illness">Acute Illness</option>
+                                        <option value="chronic-condition">Chronic Condition Management</option>
+                                        <option value="preventive-care">Preventive Care</option>
+                                        <option value="prescription-refill">Prescription Refill</option>
+                                        <option value="laboratory-review">Laboratory Results Review</option>
+                                        <option value="specialist-referral">Specialist Referral</option>
+                                        <option value="emergency">Emergency/Urgent Care</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Visit Type</label>
+                                    <select class="form-select" id="visit-type">
+                                        <option value="">Select visit type...</option>
+                                        <option value="scheduled">Scheduled Appointment</option>
+                                        <option value="walk-in">Walk-in</option>
+                                        <option value="emergency">Emergency</option>
+                                        <option value="telemedicine">Telemedicine</option>
+                                        <option value="house-call">House Call</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Priority Level</label>
+                                    <select class="form-select" id="priority-level">
+                                        <option value="">Select priority...</option>
+                                        <option value="low">Low - Routine</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High - Urgent</option>
+                                        <option value="critical">Critical - Emergency</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Detailed Reason</label>
+                                    <textarea class="form-control" id="detailed-reason" rows="4" placeholder="Please describe in detail the reason for this visit, including symptoms, concerns, or follow-up requirements..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Referring Doctor (if applicable)</label>
+                                    <input type="text" class="form-control" id="referring-doctor" placeholder="Name of referring physician">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Insurance Authorization Required</label>
+                                    <select class="form-select" id="insurance-auth">
+                                        <option value="no">No</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="pending">Pending Verification</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-clock-history"></i> Previous Visits Summary</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="previous-visits-summary" class="text-muted">
+                                        Loading previous visits...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-end mt-3">
+                                <button class="btn btn-outline-secondary me-2" onclick="clearReasonForVisit()">
+                                    <i class="bi bi-arrow-clockwise"></i> Clear Form
+                                </button>
+                                <button class="btn btn-primary" onclick="saveReasonForVisit()">
+                                    <i class="bi bi-save"></i> Save Reason for Visit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investigations Tab -->
+                <div id="tab-investigations" class="tab-content-section">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-clipboard2-data"></i> Order Investigations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="investigation-buttons">
+                                <div class="investigation-btn" onclick="toggleInvestigation('radiology')">
+                                    <i class="bi bi-image"></i>
+                                    <h6>Radiology</h6>
+                                </div>
+                                <div class="investigation-btn" onclick="toggleInvestigation('laboratory')">
+                                    <i class="bi bi-droplet"></i>
+                                    <h6>Laboratory</h6>
+                                </div>
+                                <div class="investigation-btn" onclick="toggleInvestigation('other')">
+                                    <i class="bi bi-file-medical"></i>
+                                    <h6>Other Tests</h6>
+                                </div>
+                            </div>
+
+                            <!-- Radiology Section -->
+                            <div id="investigation-radiology" class="investigation-section" style="display:none;">
+                                <h5 class="mb-3">Radiology Investigations</h5>
+                                <div id="radiology-tests-container" class="row g-3"></div>
+                                <div class="mt-3">
+                                    <label class="form-label">Additional Notes</label>
+                                    <textarea class="form-control" rows="2" id="radiology-notes" placeholder="Specify body part, clinical indication..."></textarea>
+                                </div>
+                                <button class="btn btn-primary mt-3" onclick="orderInvestigation('radiology')">
+                                    <i class="bi bi-send"></i> Order Radiology Tests
+                                </button>
+                                <div class="mt-4">
+                                    <h6 class="text-primary">Recent Radiology Orders</h6>
+                                    <div id="radiology-orders-list" class="list-group small"></div>
+                                </div>
+                            </div>
+
+                            <!-- Laboratory Section -->
+                            <div id="investigation-laboratory" class="investigation-section" style="display:none;">
+                                <h5 class="mb-3">Laboratory Tests</h5>
+                                <div id="lab-tests-container" class="row g-3"></div>
+                                <button class="btn btn-primary mt-3" onclick="orderInvestigation('laboratory')">
+                                    <i class="bi bi-send"></i> Order Lab Tests
+                                </button>
+                                <div class="mt-4">
+                                    <h6 class="text-primary">Recent Lab Orders</h6>
+                                    <div id="lab-orders-list" class="list-group small"></div>
+                                </div>
+                            </div>
+
+                            <!-- Other Investigations Section -->
+                            <div id="investigation-other" class="investigation-section" style="display:none;">
+                                <h5 class="mb-3">Other Investigations</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="Endoscopy" id="other1">
+                                    <label class="form-check-label" for="other1">Endoscopy</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="Colonoscopy" id="other2">
+                                    <label class="form-check-label" for="other2">Colonoscopy</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="Biopsy" id="other3">
+                                    <label class="form-check-label" for="other3">Biopsy</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="Stress Test" id="other4">
+                                    <label class="form-check-label" for="other4">Cardiac Stress Test</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="PFT" id="other5">
+                                    <label class="form-check-label" for="other5">Pulmonary Function Test</label>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Additional Instructions</label>
+                                    <textarea class="form-control" id="other-notes" rows="2" placeholder="Specify details..."></textarea>
+                                </div>
+                                <button class="btn btn-primary mt-3" onclick="orderInvestigation('other')">
+                                    <i class="bi bi-send"></i> Order Other Tests
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnosis & Management Tab -->
+                <div id="tab-diagnosis" class="tab-content-section">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-journal-medical"></i> Diagnosis</h5>
+                        </div>
+                        <div class="card-body">
+                            <label class="form-label">Clinical Diagnosis</label>
+                            <textarea class="form-control" id="diagnosis-text" rows="4" placeholder="Enter confirmed diagnosis or differential diagnoses..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Management Plan</h5>
+                        </div>
+                        <div class="card-body">
+                            <label class="form-label">Treatment Plan & Instructions</label>
+                            <textarea class="form-control" id="management-text" rows="6" placeholder="Enter treatment plan, patient education, follow-up instructions, lifestyle modifications, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-primary btn-lg" onclick="saveDiagnosisTreatment()">
+                            <i class="bi bi-save"></i> Save Diagnosis & Management
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Medications Tab -->
+                <div id="tab-medications" class="tab-content-section">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-capsule"></i> Prescribe Medications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Medication Name *</label>
+                                    <input type="text" class="form-control" id="med-name" list="medication-datalist" placeholder="Select or type medication">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Dosage *</label>
+                                    <input type="text" class="form-control" id="med-dosage" placeholder="e.g., 500mg">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Frequency *</label>
+                                    <select class="form-select" id="med-frequency">
+                                        <option value="">Select frequency</option>
+                                        <option value="Once daily">Once daily</option>
+                                        <option value="Twice daily">Twice daily</option>
+                                        <option value="Three times daily">Three times daily</option>
+                                        <option value="Four times daily">Four times daily</option>
+                                        <option value="Every 4 hours">Every 4 hours</option>
+                                        <option value="Every 6 hours">Every 6 hours</option>
+                                        <option value="Every 8 hours">Every 8 hours</option>
+                                        <option value="As needed">As needed (PRN)</option>
+                                        <option value="Before meals">Before meals</option>
+                                        <option value="After meals">After meals</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Duration *</label>
+                                    <input type="text" class="form-control" id="med-duration" placeholder="e.g., 7 days, 2 weeks">
+                                </div>
+                            </div>
+                            <datalist id="medication-datalist"></datalist>
+                            <button class="btn btn-primary" onclick="addMedication()">
+                                <i class="bi bi-plus-circle"></i> Add Medication
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Prescribed Medications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="medication-list">
+                                <p class="text-muted">No medications added yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Appointment Tab -->
+                <div id="tab-appointment" class="tab-content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-calendar-plus"></i> Schedule Next Appointment</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Appointment Date & Time *</label>
+                                    <input type="text" class="form-control appointment-date" id="appointment-date" placeholder="Select date and time">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Reason for Visit *</label>
+                                    <input type="text" class="form-control" id="appointment-reason" placeholder="e.g., Follow-up, Lab results review">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Additional Notes</label>
+                                <textarea class="form-control" id="appointment-notes" rows="3" placeholder="Special instructions, preparations required, etc."></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveAppointment()">
+                                <i class="bi bi-calendar-check"></i> Schedule Appointment
+                            </button>
+                            <div class="mt-4">
+                                <h6 class="text-primary">Upcoming Appointments</h6>
+                                <div id="appointments-list" class="list-group small"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-check-circle"></i> Complete Visit</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p class="mb-3">Once all information is entered and medications are prescribed, you can complete this patient visit.</p>
+                            <button class="btn btn-success btn-lg" onclick="completeVisit()">
+                                <i class="bi bi-check-circle-fill"></i> Complete & Save Visit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Modal -->
+    <div class="modal fade" id="patientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <form id="patient-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-person-plus"></i> <span id="patient-modal-title">Register Patient</span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger" id="patient-error" style="display:none;"></div>
+                        <input type="hidden" id="patient-id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="patient-firstname" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="patient-lastname" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Date of Birth *</label>
+                                <input type="text" class="form-control date-picker" id="patient-dob" placeholder="YYYY-MM-DD" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Gender *</label>
+                                <select class="form-select" id="patient-gender" required>
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Blood Type</label>
+                                <input type="text" class="form-control" id="patient-bloodtype" placeholder="e.g., O+">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="patient-email">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="patient-phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Height (cm)</label>
+                                <input type="number" class="form-control" id="patient-height">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" step="0.1" class="form-control" id="patient-weight">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" id="patient-address" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Emergency Contact</label>
+                                <input type="text" class="form-control" id="patient-emergency">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Insurance Details</label>
+                                <input type="text" class="form-control" id="patient-insurance">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Allergies</label>
+                                <textarea class="form-control" id="patient-allergies" rows="2" placeholder="Comma separated"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Chronic Conditions</label>
+                                <textarea class="form-control" id="patient-conditions" rows="2" placeholder="Comma separated"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Current Medications</label>
+                                <textarea class="form-control" id="patient-medications" rows="2" placeholder="Comma separated"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> <span id="patient-submit-label">Save Patient</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient List Modal -->
+    <div class="modal fade" id="patientListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-people"></i> Registered Patients</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="patient-list-empty" class="text-muted text-center py-3">No patients registered yet.</div>
+                    <div id="patient-list-items" class="list-group"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="openPatientModal()">
+                        <i class="bi bi-person-plus"></i> New Patient
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-1">&copy; 2025 MediCare EHR Information System. All rights reserved.</p>
+            <p class="mb-0"><small>Professional Healthcare Data Management Solution</small></p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="JS/main.js"></script>
+</body>
+</html>

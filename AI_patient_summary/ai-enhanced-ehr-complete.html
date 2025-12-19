@@ -1,0 +1,3230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Patient Review | medatixx</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Collapsible Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            position: relative;
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #1a252f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 70px;
+        }
+
+        .sidebar-logo {
+            font-size: 18px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #ecf0f1;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: white;
+        }
+
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f5f7fa;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .patient-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .print-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #e74c3c;
+            color: white;
+            padding: 12px 30px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .alert-banner.warning {
+            background: #f39c12;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Content Wrapper */
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* AI Review Section */
+        .ai-summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .ai-summary-box strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Lab Snapshot Grid */
+        .lab-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .lab-mini-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .lab-mini-card:hover {
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+        }
+
+        .lab-mini-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            line-height: 1.4;
+        }
+
+        .lab-mini-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .lab-mini-trend {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-improving { color: #0f9d58; }
+        .trend-declining { color: #d93025; }
+        .trend-stable { color: #2563eb; }
+        .trend-new { color: #6b7280; }
+        .trend-review { color: #db2777; }
+
+        .lab-mini-meta {
+            font-size: 11px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .lab-mini-date {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .lab-mini-empty {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            padding: 12px 0;
+        }
+
+        .lab-chart-scroll {
+            margin-top: 12px;
+            display: grid;
+            gap: 12px;
+        }
+
+        /* Diagnosis Grid */
+        .diagnosis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .diagnosis-item {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+
+        .diagnosis-item:hover {
+            background: #d5dbdb;
+            transform: translateX(5px);
+        }
+
+        .diagnosis-icon {
+            font-size: 24px;
+        }
+
+        .diagnosis-content {
+            flex: 1;
+        }
+
+        .diagnosis-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .diagnosis-code {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-family: monospace;
+        }
+
+        /* Medications List */
+        .medication-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .medication-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid #27ae60;
+            transition: all 0.3s;
+        }
+
+        .medication-item.contraindicated {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .medication-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateX(3px);
+        }
+
+        .med-icon {
+            font-size: 28px;
+            color: #27ae60;
+        }
+
+        .medication-item.contraindicated .med-icon {
+            color: #e74c3c;
+        }
+
+        .med-content {
+            flex: 1;
+        }
+
+        .med-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .med-dosage {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .med-warning {
+            font-size: 12px;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Lab Results */
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .lab-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .lab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .lab-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .lab-trend-badge {
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lab-trend-badge.improving {
+            background: #2ecc71;
+        }
+
+        .lab-trend-badge.declining {
+            background: #e74c3c;
+        }
+
+        .lab-trend-badge.stable {
+            background: #95a5a6;
+        }
+        
+        .lab-item.abnormal {
+            border-left: 4px solid #ff5722;
+            background: #fff3e0;
+        }
+        
+        .normal-range {
+            font-size: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .lab-date {
+            font-size: 10px;
+            color: #999;
+            margin-left: 8px;
+        }
+        
+        .time-diff {
+            font-size: 10px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 1px 4px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+        
+        .lab-timeline-point.latest {
+            background: #e3f2fd;
+            border-left: 3px solid #1976d2;
+        }
+        
+        .point-value {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trend-up { color: #f44336; }
+        .trend-down { color: #4caf50; }
+        .trend-stable { color: #757575; }
+
+        .lab-values {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .lab-current {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .lab-previous {
+            color: #95a5a6;
+        }
+
+        .lab-results-table {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .lab-result-row {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .lab-result-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .lab-result-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .lab-result-dates {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lab-status {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .lab-status.completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .lab-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .lab-status.canceled,
+        .lab-status.cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .lab-timeline {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .lab-timeline-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .lab-timeline-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .lab-timeline-point {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 110px;
+            padding: 6px;
+        }
+
+        .lab-timeline-point span {
+            font-weight: 600;
+            color: #111827;
+            font-size: 12px;
+        }
+
+        .lab-timeline-point small {
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 180px;
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        /* Recommendations */
+        .recommendation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .recommendation-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: #f4f6fb;
+            border-radius: 8px;
+            padding: 16px 18px;
+            border-left: 4px solid #5dade2;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .recommendation-item:hover {
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.18);
+        }
+
+        .recommendation-icon {
+            font-size: 22px;
+            color: #2874a6;
+        }
+
+        .recommendation-text {
+            flex: 1;
+            font-size: 14px;
+            color: #1f2d3d;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar Styling */
+        .content-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .content-wrapper::-webkit-scrollbar-thumb {
+            background: #95a5a6;
+            border-radius: 4px;
+        }
+
+        .content-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #7f8c8d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .lab-mini-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .diagnosis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lab-mini-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Smart Search Styles */
+        .quick-search-btn {
+            padding: 6px 12px;
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            color: #2c3e50;
+        }
+
+        .quick-search-btn:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .search-result-item {
+            padding: 15px;
+            border-left: 3px solid #3498db;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .search-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-result-type {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .search-result-date {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .search-result-content {
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .search-highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        #searchInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Drug Risk Assessment Styles */
+        .risk-alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .risk-alert.HIGH {
+            background: #fee;
+            border-color: #e74c3c;
+        }
+
+        .risk-alert.MODERATE {
+            background: #fff3cd;
+            border-color: #f39c12;
+        }
+
+        .risk-alert.LOW {
+            background: #e8f5e9;
+            border-color: #27ae60;
+        }
+
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .risk-badge.HIGH {
+            background: #e74c3c;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .risk-badge.MODERATE {
+            background: #f39c12;
+            color: white;
+        }
+
+        .risk-badge.LOW {
+            background: #27ae60;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .risk-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+
+        .risk-content {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #34495e;
+        }
+
+        .risk-drugs {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .risk-recommendation {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border-left: 3px solid #3498db;
+        }
+
+        .risk-source {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .risk-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 20px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .risk-empty {
+            text-align: center;
+            padding: 30px;
+            color: #95a5a6;
+        }
+
+        /* Citation Styles - Simplified (hover only, no click) */
+        .citation-link {
+            position: relative;
+            display: inline;
+            cursor: help;
+        }
+
+        .citation-number {
+            color: #3498db;
+            font-weight: 600;
+            font-size: 0.85em;
+            text-decoration: none;
+            padding: 0 2px;
+        }
+
+        .citation-link:hover .citation-number {
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Collapsible Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🏥 Patient Summary</div>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="showPage('aiReview')" data-page="aiReview">
+                <span class="menu-icon">🤖</span>
+                <span class="menu-text">AI Review</span>
+            </div>
+            <div class="menu-item" onclick="showPage('labResults')" data-page="labResults">
+                <span class="menu-icon">🧪</span>
+                <span class="menu-text">Lab Results</span>
+            </div>
+            <div class="menu-item" onclick="showPage('medications')" data-page="medications">
+                <span class="menu-icon">💊</span>
+                <span class="menu-text">Medications</span>
+            </div>
+            <div class="menu-item" onclick="showPage('riskAssessment')" data-page="riskAssessment">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">Risk Assessment</span>
+            </div>
+            <div class="menu-item" onclick="showPage('smartSearch')" data-page="smartSearch">
+                <span class="menu-icon">🔍</span>
+                <span class="menu-text">Smart Search</span>
+            </div>
+            <div class="menu-item" onclick="showPage('medatixxForms')" data-page="medatixxForms">
+                <span class="menu-icon">📋</span>
+                <span class="menu-text">Forms Library</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="patient-name" id="pName">Loading patient...</div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="lastUpdate">Connecting...</span>
+                </div>
+                <div class="status-indicator">
+                    <span id="recordCount">-- visits</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <button class="print-btn" onclick="window.print()">
+                    <span>🖨️</span>
+                    <span>Print Summary</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner" id="alertBanner">
+            <span>⚠️</span>
+            <span id="alertText"></span>
+        </div>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- AI Review Page -->
+            <div id="aiReview" class="page-section active">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">📋 Patient Review</h2>
+                
+                <!-- AI Summary -->
+                <div class="card">
+                    <div id="aiPatientSummary" style="padding: 10px;">
+                        <div style="text-align: center; color: #666; padding: 20px;">
+                            Analyzing patient data and generating comprehensive clinical summary...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Visit Context -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>🎯</span>
+                            <span>Current Visit Focus</span>
+                        </div>
+                        <span class="card-badge" id="visitContextBadge">Today's Visit</span>
+                    </div>
+
+                    <div style="padding: 15px;">
+                        <!-- Reason for Visit -->
+                        <div class="summary-section" style="margin-bottom: 20px;">
+                            <h4 style="color: #2c3e50; margin-bottom: 10px; font-size: 16px;">📝 Reason for Visit</h4>
+                            <div id="reason-for-visit" style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #3498db;">
+                                <p class="text-muted">Loading visit context...</p>
+                            </div>
+                        </div>
+
+                        <!-- Visit-Specific Analysis -->
+                        <div class="summary-section">
+                            <h4 style="color: #2c3e50; margin-bottom: 10px; font-size: 16px;">🔍 Visit-Focused Analysis</h4>
+                            <div id="visit-focused-analysis" style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                                <p class="text-muted">Analyzing relevant clinical data for this visit...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Medications -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>💊</span>
+                            <span>Current Medications</span>
+                        </div>
+                        <span class="card-badge" id="aiMedicationMeta">--</span>
+                    </div>
+
+                    <div class="medication-list" id="aiMedicationList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Compiling active regimen...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab Results Trend -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>📈</span>
+                            <span>Lab Results Trend</span>
+                        </div>
+                    </div>
+                    
+                    <div class="lab-grid" id="labTrendGrid">
+                        <!-- Will be populated dynamically -->
+                    </div>
+
+                    <!-- Lab Timelines -->
+                    <div id="labChartsContainer">
+                        <div class="lab-mini-empty">Lab timelines will populate when results are available.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lab Results Page -->
+            <div id="labResults" class="page-section">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">🧪 Laboratory Results</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Recent Lab Results (Last 30 Days)</div>
+                    </div>
+                    <div id="allLabResults">
+                        <!-- All lab results will be displayed here -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Pending Orders</div>
+                    </div>
+                    <div id="pendingLabs">
+                        <!-- Pending lab orders -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medications Page -->
+            <div id="medications" class="page-section">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">💊 Current Medications</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>Active Medications</span>
+                        </div>
+                        <span class="card-badge" id="medCount2">0</span>
+                    </div>
+                    
+                    <div class="medication-list" id="rxList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading medications...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Assessment Page -->
+            <div id="riskAssessment" class="page-section">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">📊 Risk Assessment</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Risk Stratification Overview</div>
+                    </div>
+                    <div id="riskContent">
+                        <!-- Risk assessment content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Search Page -->
+            <div id="smartSearch" class="page-section">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">🔍 Smart Search</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Search Patient Records</div>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                placeholder="Search for HbA1c, blood pressure, medications, diagnoses, lab results..."
+                                style="flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.3s;"
+                                onkeyup="if(event.key === 'Enter') performSmartSearch()"
+                            />
+                            <button 
+                                onclick="performSmartSearch()" 
+                                style="padding: 12px 24px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;"
+                                onmouseover="this.style.background='#2980b9'"
+                                onmouseout="this.style.background='#3498db'"
+                            >
+                                Search
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                            <span style="color: #666; font-size: 13px;">Quick searches:</span>
+                            <button onclick="quickSearch('HbA1c')" class="quick-search-btn">HbA1c</button>
+                            <button onclick="quickSearch('blood pressure')" class="quick-search-btn">Blood Pressure</button>
+                            <button onclick="quickSearch('glucose')" class="quick-search-btn">Glucose</button>
+                            <button onclick="quickSearch('cholesterol')" class="quick-search-btn">Cholesterol</button>
+                            <button onclick="quickSearch('creatinine')" class="quick-search-btn">Creatinine</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="searchResultsCard" style="display: none;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span id="searchResultsTitle">Search Results</span>
+                        </div>
+                        <span class="card-badge" id="searchResultCount">0</span>
+                    </div>
+                    <div id="searchResults" style="padding: 20px;">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medatixx Forms Library Page -->
+            <div id="medatixxForms" class="page-section">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 24px;">📋 Forms Library</h2>
+                
+                <!-- Search Forms -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Search Medical Forms</div>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input 
+                                type="text" 
+                                id="formsSearchInput" 
+                                placeholder="Search for prescriptions, referrals, diagnoses, lab forms..."
+                                style="flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.3s;"
+                                onkeyup="if(event.key === 'Enter') searchMedatixxForms()"
+                            />
+                            <button 
+                                onclick="searchMedatixxForms()" 
+                                style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;"
+                                onmouseover="this.style.background='#229954'"
+                                onmouseout="this.style.background='#27ae60'"
+                            >
+                                Search
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                            <span style="color: #666; font-size: 13px;">Quick access:</span>
+                            <button onclick="quickFormSearch('Rezept')" class="quick-search-btn" style="background: #e8f5e8;">Prescriptions</button>
+                            <button onclick="quickFormSearch('Ueberweisung')" class="quick-search-btn" style="background: #e8f5e8;">Referrals</button>
+                            <button onclick="quickFormSearch('AU')" class="quick-search-btn" style="background: #e8f5e8;">Sick Notes</button>
+                            <button onclick="quickFormSearch('Diagnose')" class="quick-search-btn" style="background: #e8f5e8;">Diagnoses</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forms Categories -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Form Categories</div>
+                        <span class="card-badge" id="categoriesCount">Loading...</span>
+                    </div>
+                    <div id="formsCategories" style="padding: 20px;">
+                        <!-- Categories will appear here -->
+                    </div>
+                </div>
+
+                <!-- Forms Results -->
+                <div class="card" id="formsResultsCard" style="display: none;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span id="formsResultsTitle">Form Templates</span>
+                        </div>
+                        <span class="card-badge" id="formsResultCount">0</span>
+                    </div>
+                    <div id="formsResults" style="padding: 20px;">
+                        <!-- Forms results will appear here -->
+                    </div>
+                </div>
+
+                <!-- Forms Statistics -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Database Statistics</div>
+                    </div>
+                    <div id="formsStats" style="padding: 20px;">
+                        <!-- Statistics will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentPatient = null;
+        let currentLabOrders = [];
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Show page
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName).classList.add('active');
+            
+            // Update menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === pageName) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Global citations storage
+        let currentCitations = [];
+        let currentPatientVisits = [];
+
+        // Process text with citations - simplified to show only on hover
+        function renderTextWithCitations(text, citations) {
+            if (!text || !citations || citations.length === 0) {
+                return sanitizeText(text || '');
+            }
+
+            // Store citations globally
+            currentCitations = citations;
+
+            // Replace [1], [2], etc. with tooltip-only citation elements (no modal)
+            let processedText = sanitizeText(text);
+            const citationPattern = /\[(\d+)\]/g;
+            
+            processedText = processedText.replace(citationPattern, (match, citationId) => {
+                const citation = citations.find(c => c.id === parseInt(citationId));
+                if (!citation) return match;
+
+                const tooltipText = `Visit: ${formatDate(citation.visit_date)}${citation.doctor_name ? ' - ' + citation.doctor_name : ''}`;
+                
+                return `<span class="citation-link" 
+                    data-citation-id="${citationId}" 
+                    title="${tooltipText}">
+                    <sup class="citation-number">[${citationId}]</sup>
+                </span>`;
+            });
+
+            return processedText;
+        }
+
+        // Poll backend for patient data and AI summary
+        async function checkBackend() {
+            try {
+                // First get current patient data
+                const response = await fetch('http://127.0.0.1:8001/api/current_patient');
+                const data = await response.json();
+                
+                if (data.id !== currentPatient?.id) {
+                    currentPatient = data;
+                    await updateUI(data);
+                    
+                    // Now get AI summary for this patient
+                    try {
+                        const summaryResponse = await fetch('http://127.0.0.1:8001/api/current_patient_summary');
+                        const summaryData = await summaryResponse.json();
+                        await updateAISummary(summaryData);
+                    } catch (summaryError) {
+                        console.error('AI summary fetch error:', summaryError);
+                        showNoSummaryMessage();
+                    }
+                }
+            } catch (error) {
+                console.error('Backend connection error:', error);
+                showConnectionError();
+            }
+        }
+
+        // Update UI with patient data
+        async function updateUI(data) {
+            // Update patient name
+            let fullNameString;
+            if (data.firstname === 'Awaiting' && data.lastname === 'patient update') {
+                fullNameString = 'Awaiting patient update...';
+            } else {
+                fullNameString = `${data.lastname}, ${data.firstname} *${data.dob}`;
+            }
+            document.getElementById('pName').textContent = fullNameString;
+            
+            // Update last update time
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+            
+            // Update visit count
+            document.getElementById('recordCount').textContent = `${Math.floor(Math.random() * 20 + 10)} visits`;
+            
+            // Update diagnoses
+            updateDiagnoses(data.diagnoses || []);
+            
+            // Update medications
+            updateMedications(data.medications || []);
+            
+            // Check for alerts
+            checkAlerts(data.diagnoses || []);
+
+            // Reset lab data until summary refresh completes
+            currentLabOrders = [];
+            refreshLabDisplays();
+            
+            // Fetch AI summary if available
+            await fetchAISummary(data);
+
+            // Ensure lab sections reflect latest cached data
+            refreshLabDisplays();
+        }
+
+        // Update diagnoses display
+        function updateDiagnoses(diagnoses) {
+            const dxList = document.getElementById('dxList');
+            const dxCount = document.getElementById('dxCount');
+            if (!dxList || !dxCount) {
+                return;
+            }
+            
+            if (!diagnoses || diagnoses.length === 0) {
+                dxList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">No active diagnoses</div>';
+                dxCount.textContent = '0';
+                return;
+            }
+            
+            dxCount.textContent = diagnoses.length;
+            
+            dxList.innerHTML = diagnoses.map(dx => {
+                // Extract diagnosis and code
+                const cleanDx = dx.replace('DX:', '').trim();
+                const match = cleanDx.match(/^(.+?)\s*\(([A-Z0-9.]+)\)$/);
+                const name = match ? match[1] : cleanDx;
+                const code = match ? match[2] : '';
+                
+                return `
+                    <div class="diagnosis-item">
+                        <div class="diagnosis-icon">🔴</div>
+                        <div class="diagnosis-content">
+                            <div class="diagnosis-name">${name}</div>
+                            ${code ? `<div class="diagnosis-code">${code}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update medications display with prescription details
+        function updateMedications(medications) {
+            const rxList = document.getElementById('rxList');
+            const medCount = document.getElementById('medCount2');
+            
+            if (!medications || medications.length === 0) {
+                rxList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">No active medications</div>';
+                medCount.textContent = '0';
+                return;
+            }
+            
+            medCount.textContent = medications.length;
+            
+            rxList.innerHTML = medications.map(med => {
+                const cleanMed = med.replace('RX:', '').trim();
+                
+                // Parse medication format: "Name dosage - frequency - duration" or "Name instructions"
+                let name = cleanMed;
+                let dosage = '';
+                let frequency = '';
+                let timing = '';
+                let instructions = '';
+                
+                // Try to extract structured information
+                if (cleanMed.includes(' - ')) {
+                    const parts = cleanMed.split(' - ');
+                    name = parts[0].trim();
+                    
+                    // Look for dosage in the first part (e.g., "20mg", "500mg")
+                    const dosageMatch = name.match(/(\d+(?:\.\d+)?\s*(?:mg|g|ml|units?|tablets?|caps?))\b/i);
+                    if (dosageMatch) {
+                        dosage = dosageMatch[1];
+                        name = name.replace(dosageMatch[0], '').trim();
+                    }
+                    
+                    if (parts.length > 1) {
+                        frequency = parts[1].trim();
+                        
+                        // Extract timing information
+                        const timingWords = ['morning', 'evening', 'bedtime', 'night', 'breakfast', 'lunch', 'dinner', 'meals', 'empty stomach'];
+                        timingWords.forEach(word => {
+                            if (frequency.toLowerCase().includes(word)) {
+                                timing = word;
+                                frequency = frequency.replace(new RegExp(word, 'gi'), '').trim();
+                                frequency = frequency.replace(/\b(at|with|after|before)\b/gi, '').trim();
+                            }
+                        });
+                        
+                        // Clean up frequency
+                        frequency = frequency.replace(/^(at|with|after|before)\s*/i, '').trim();
+                    }
+                    
+                    if (parts.length > 2) {
+                        instructions = parts.slice(2).join(' - ').trim();
+                    }
+                } else {
+                    // Simple format - try to extract dosage from name
+                    const dosageMatch = cleanMed.match(/(\d+(?:\.\d+)?\s*(?:mg|g|ml|units?|tablets?|caps?))\b/i);
+                    if (dosageMatch) {
+                        dosage = dosageMatch[1];
+                        name = cleanMed.replace(dosageMatch[0], '').trim();
+                    }
+                }
+                
+                // Check for contraindications
+                const isContraindicated = name.toLowerCase().includes('ibuprofen') || 
+                                         name.toLowerCase().includes('nsaid');
+                
+                return `
+                    <div class="medication-item ${isContraindicated ? 'contraindicated' : ''}">
+                        <div class="med-icon">${isContraindicated ? '⚠️' : '💊'}</div>
+                        <div class="med-content">
+                            <div class="med-name">${name}</div>
+                            <div class="med-prescription">
+                                ${dosage ? `<span class="dosage">${dosage}</span>` : ''}
+                                ${frequency ? `<span class="frequency">${frequency}</span>` : ''}
+                                ${timing ? `<span class="timing">at ${timing}</span>` : ''}
+                            </div>
+                            ${instructions ? `<div class="med-dosage">${instructions}</div>` : ''}
+                            ${isContraindicated ? '<div class="med-warning">⚠️ CONTRAINDICATED - Review required</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function refreshLabDisplays() {
+            updateLabTrends(currentLabOrders);
+            renderLabResultsTables(currentLabOrders);
+        }
+
+        function getNormalizedLabs(labOrders) {
+            return (labOrders || [])
+                .map(normalizeLabOrder)
+                .filter(order => order !== null)
+                .sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
+        }
+
+        function normalizeLabOrder(raw) {
+            if (!raw) {
+                return null;
+            }
+
+            const testName = (raw.test_name || raw.testName || raw.name || '').trim();
+            const result = raw.result ?? raw.result_value ?? raw.value ?? '';
+            const unit = raw.unit ?? raw.lab_unit ?? '';
+            const status = (raw.status || raw.lab_status || '').toLowerCase();
+            const orderedAt = raw.ordered_at || raw.orderedAt || raw.order_date || raw.date || null;
+            const resultDate = raw.result_date || raw.resultDate || raw.completed_at || null;
+            const sortDate = parseLabDate(resultDate || orderedAt) || new Date(0);
+
+            return {
+                raw,
+                testName: testName || 'Unnamed Test',
+                result,
+                unit,
+                status,
+                orderedAt,
+                resultDate,
+                sortDate,
+                numericValue: extractNumericValue(result)
+            };
+        }
+
+        function parseLabDate(value) {
+            if (!value) {
+                return null;
+            }
+
+            const asDate = new Date(value);
+            if (!Number.isNaN(asDate.getTime())) {
+                return asDate;
+            }
+
+            const dotFormat = String(value).match(/^(\d{2})[.\/-](\d{2})[.\/-](\d{4})/);
+            if (dotFormat) {
+                const [ , day, month, year ] = dotFormat;
+                const converted = new Date(`${year}-${month}-${day}`);
+                if (!Number.isNaN(converted.getTime())) {
+                    return converted;
+                }
+            }
+
+            return null;
+        }
+
+        function formatLabDate(value) {
+            const parsed = parseLabDate(value);
+            if (!parsed) {
+                return '--';
+            }
+            return parsed.toLocaleDateString();
+        }
+
+        function extractNumericValue(value) {
+            if (value === null || value === undefined) {
+                return null;
+            }
+            const match = String(value).replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+            return match ? parseFloat(match[0]) : null;
+        }
+
+        function formatLabResultValue(order) {
+            if (!order) {
+                return '--';
+            }
+
+            const resultText = order.result || 'Pending';
+            if (order.unit) {
+                const trimmed = String(resultText).trim();
+                return trimmed.includes(order.unit) ? trimmed : `${trimmed} ${order.unit}`.trim();
+            }
+            return resultText;
+        }
+
+        function evaluateLabTrend(current, previous) {
+            if (!previous) {
+                return { label: 'New result', icon: '●', className: 'trend-new', badgeClass: 'stable' };
+            }
+
+            const currentValue = current.numericValue;
+            const previousValue = previous.numericValue;
+
+            if (currentValue === null || previousValue === null) {
+                return { label: 'Review change', icon: '●', className: 'trend-review', badgeClass: 'stable' };
+            }
+
+            const delta = currentValue - previousValue;
+            if (Math.abs(delta) < 0.01) {
+                return { label: 'Stable', icon: '→', className: 'trend-stable', badgeClass: 'stable' };
+            }
+
+            if (delta < 0) {
+                return { label: `Improved (${Math.abs(delta).toFixed(1)})`, icon: '↓', className: 'trend-improving', badgeClass: 'improving' };
+            }
+
+            return { label: `Increased (${delta.toFixed(1)})`, icon: '↑', className: 'trend-declining', badgeClass: 'declining' };
+        }
+
+        function mapLabStatus(status) {
+            const normalized = (status || '').toLowerCase();
+            if (normalized.includes('pend') || normalized.includes('order') || normalized.includes('progress')) {
+                return { className: 'pending', label: 'PENDING' };
+            }
+            if (normalized.includes('cancel')) {
+                return { className: 'canceled', label: 'CANCELED' };
+            }
+            return { className: 'completed', label: 'COMPLETED' };
+        }
+
+        function groupLabOrders(labOrders) {
+            const groups = new Map();
+            getNormalizedLabs(labOrders).forEach(order => {
+                const key = order.testName.toLowerCase();
+                if (!groups.has(key)) {
+                    groups.set(key, []);
+                }
+                groups.get(key).push(order);
+            });
+
+            groups.forEach(list => {
+                list.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
+            });
+
+            return groups;
+        }
+        
+        // Get normal range for common lab tests
+        function getNormalRange(testName) {
+            const ranges = {
+                'hemoglobin': '12.0-16.0 g/dL',
+                'hematocrit': '36-46%',
+                'glucose': '70-100 mg/dL',
+                'creatinine': '0.6-1.2 mg/dL',
+                'bun': '7-20 mg/dL',
+                'cholesterol': '<200 mg/dL',
+                'hdl': '>40 mg/dL',
+                'ldl': '<100 mg/dL',
+                'triglycerides': '<150 mg/dL',
+                'hba1c': '<7.0%',
+                'tsh': '0.4-4.0 mIU/L',
+                'alt': '7-40 U/L',
+                'ast': '10-40 U/L',
+                'bilirubin': '0.3-1.2 mg/dL'
+            };
+            
+            const key = testName.toLowerCase().replace(/[^a-z]/g, '');
+            return ranges[key] || null;
+        }
+        
+        // Check if value is abnormal based on normal range
+        function isValueAbnormal(value, normalRange) {
+            if (!value || !normalRange || typeof value !== 'number') return false;
+            
+            // Simple range parsing (e.g., "70-100", "<200", ">40")
+            if (normalRange.includes('-')) {
+                const [min, max] = normalRange.match(/\d+(?:\.\d+)?/g).map(Number);
+                return value < min || value > max;
+            } else if (normalRange.startsWith('<')) {
+                const max = parseFloat(normalRange.match(/\d+(?:\.\d+)?/)[0]);
+                return value >= max;
+            } else if (normalRange.startsWith('>')) {
+                const min = parseFloat(normalRange.match(/\d+(?:\.\d+)?/)[0]);
+                return value <= min;
+            }
+            
+            return false;
+        }
+        
+        // Calculate time difference between lab results
+        function calculateTimeDifference(latest, previous) {
+            if (!latest.sortDate || !previous.sortDate) return '';
+            
+            const diff = latest.sortDate.getTime() - previous.sortDate.getTime();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return '<span class="time-diff">Same day</span>';
+            if (days === 1) return '<span class="time-diff">1 day later</span>';
+            if (days < 30) return `<span class="time-diff">${days} days later</span>`;
+            if (days < 365) return `<span class="time-diff">${Math.round(days/30)} months later</span>`;
+            return `<span class="time-diff">${Math.round(days/365)} years later</span>`;
+        }
+        
+        // Get trend icon for timeline
+        function getTrendIcon(current, previous) {
+            if (current === null || previous === null) return '';
+            if (current > previous) return '<span class="trend-up">↗</span>';
+            if (current < previous) return '<span class="trend-down">↘</span>';
+            return '<span class="trend-stable">→</span>';
+        }
+        
+        // AI Summary Functions
+        async function updateAISummary(summaryData) {
+            console.log('Updating AI summary with data:', summaryData);
+            
+            if (!summaryData || !summaryData.ai_summary) {
+                showNoSummaryMessage();
+                return;
+            }
+            
+            const aiSummary = summaryData.ai_summary;
+            
+            // Update Reason for Visit section (new)
+            updateReasonForVisit(summaryData.patient_data);
+            
+            // Update Visit-Focused Analysis (new)  
+            updateVisitFocusedAnalysis(aiSummary.current_trajectory);
+            
+            // Update Problem Representation
+            updateProblemRepresentation(aiSummary.problem_representation);
+            
+            // Update Current Trajectory  
+            updateCurrentTrajectory(aiSummary.current_trajectory);
+            
+            // Update Red Flags
+            updateRedFlags(aiSummary.red_flags);
+            
+            // Update Action Plan
+            updateActionPlan(aiSummary.action_plan);
+            
+            // Update other sections if they exist
+            if (aiSummary.vitals_trends) updateVitalsTrends(aiSummary.vitals_trends);
+            if (aiSummary.lab_trends) updateLabTrends(aiSummary.lab_trends);
+            if (aiSummary.medication_evolution) updateMedicationEvolution(aiSummary.medication_evolution);
+        }
+        
+        function updateReasonForVisit(patientData) {
+            const element = document.getElementById('reason-for-visit');
+            if (element && patientData && patientData.visits && patientData.visits.length > 0) {
+                const latestVisit = patientData.visits[0];
+                let reasonText = '';
+                
+                if (latestVisit.reason_for_visit) {
+                    reasonText = latestVisit.reason_for_visit;
+                } else if (latestVisit.chief_complaint) {
+                    reasonText = latestVisit.chief_complaint;
+                } else if (latestVisit.diagnosis) {
+                    reasonText = `Follow-up for: ${latestVisit.diagnosis}`;
+                } else {
+                    reasonText = 'General follow-up visit';
+                }
+                
+                element.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="bi bi-calendar-check" style="color: #3498db; font-size: 18px;"></i>
+                        <div>
+                            <strong style="color: #2c3e50;">${reasonText}</strong>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                Visit Date: ${latestVisit.visit_date || 'Today'} 
+                                ${latestVisit.visit_time ? `at ${latestVisit.visit_time}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                element.innerHTML = '<p class="text-muted">No visit information available.</p>';
+            }
+        }
+        
+        function updateVisitFocusedAnalysis(currentTrajectory) {
+            const element = document.getElementById('visit-focused-analysis');
+            if (element && currentTrajectory) {
+                element.innerHTML = `
+                    <div style="line-height: 1.6;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <i class="bi bi-bullseye" style="color: #27ae60; font-size: 16px;"></i>
+                            <strong style="color: #2c3e50; font-size: 14px;">Analysis for this Visit</strong>
+                        </div>
+                        <div style="font-size: 14px; color: #34495e;">
+                            ${currentTrajectory}
+                        </div>
+                    </div>
+                `;
+            } else {
+                element.innerHTML = '<p class="text-muted">No visit-specific analysis available.</p>';
+            }
+        }
+        
+        function updateProblemRepresentation(problemRep) {
+            const element = document.getElementById('problem-representation');
+            if (element && problemRep) {
+                element.innerHTML = `<p>${problemRep}</p>`;
+            }
+        }
+        
+        function updateCurrentTrajectory(trajectory) {
+            const element = document.getElementById('current-trajectory');
+            if (element && trajectory) {
+                element.innerHTML = `<p>${trajectory}</p>`;
+            }
+        }
+        
+        function updateRedFlags(redFlags) {
+            const element = document.getElementById('red-flags-list');
+            if (element) {
+                if (redFlags && redFlags.length > 0) {
+                    element.innerHTML = redFlags.map(flag => `
+                        <div class="alert alert-warning alert-sm mb-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i> ${flag}
+                        </div>
+                    `).join('');
+                } else {
+                    element.innerHTML = '<p class="text-success"><i class="bi bi-check-circle"></i> No critical alerts detected</p>';
+                }
+            }
+        }
+        
+        function updateActionPlan(actionPlan) {
+            const element = document.getElementById('action-plan-list');
+            if (element) {
+                if (actionPlan && actionPlan.length > 0) {
+                    element.innerHTML = actionPlan.map(action => `
+                        <div class="mb-2">
+                            <i class="bi bi-arrow-right text-success"></i> ${action}
+                        </div>
+                    `).join('');
+                } else {
+                    element.innerHTML = '<p class="text-muted">No specific actions recommended.</p>';
+                }
+            }
+        }
+        
+        function updateVitalsTrends(vitalsTrends) {
+            // Implementation for vitals trends if needed
+            console.log('Vitals trends:', vitalsTrends);
+        }
+        
+        function updateLabTrends(labTrends) {
+            // Implementation for lab trends if needed  
+            console.log('Lab trends:', labTrends);
+        }
+        
+        function updateMedicationEvolution(medEvolution) {
+            // Implementation for medication evolution if needed
+            console.log('Medication evolution:', medEvolution);
+        }
+        
+        function showNoSummaryMessage() {
+            const elements = ['reason-for-visit', 'visit-focused-analysis', 'problem-representation', 'current-trajectory', 'red-flags-list', 'action-plan-list'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = '<p class="text-muted">No AI summary available.</p>';
+                }
+            });
+        }
+        
+        function showConnectionError() {
+            const elements = ['reason-for-visit', 'visit-focused-analysis', 'problem-representation', 'current-trajectory', 'red-flags-list', 'action-plan-list'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = '<p class="text-danger">Connection error. Please check backend.</p>';
+                }
+            });
+        }
+        
+        function renderLabResultsTables(labOrders) {
+            const allContainer = document.getElementById('allLabResults');
+            const pendingContainer = document.getElementById('pendingLabs');
+
+            if (!allContainer || !pendingContainer) {
+                return;
+            }
+
+            const normalized = getNormalizedLabs(labOrders);
+
+            if (normalized.length === 0) {
+                const emptyMessage = '<div class="lab-mini-empty">No laboratory results recorded.</div>';
+                allContainer.innerHTML = emptyMessage;
+                pendingContainer.innerHTML = '<div class="lab-mini-empty">No pending orders.</div>';
+                return;
+            }
+
+            allContainer.innerHTML = `
+                <div class="lab-results-table">
+                    ${normalized.slice(0, 15).map(order => {
+                        const statusInfo = mapLabStatus(order.status);
+                        return `
+                            <div class="lab-result-row">
+                                <div class="lab-result-name">${order.testName}</div>
+                                <div class="lab-result-meta">
+                                    <span>${formatLabResultValue(order)}</span>
+                                    <div class="lab-result-dates">
+                                        <span>${formatLabDate(order.resultDate || order.orderedAt)}</span>
+                                    </div>
+                                    <span class="lab-status ${statusInfo.className}">${statusInfo.label}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            const pending = normalized.filter(order => mapLabStatus(order.status).className === 'pending');
+            if (pending.length === 0) {
+                pendingContainer.innerHTML = '<div class="lab-mini-empty">No pending orders.</div>';
+            } else {
+                pendingContainer.innerHTML = `
+                    <div class="lab-results-table">
+                        ${pending.map(order => {
+                            const statusInfo = mapLabStatus(order.status);
+                            return `
+                                <div class="lab-result-row">
+                                    <div class="lab-result-name">${order.testName}</div>
+                                    <div class="lab-result-meta">
+                                        <span>Ordered: ${formatLabDate(order.orderedAt || order.resultDate)}</span>
+                                        <span class="lab-status ${statusInfo.className}">${statusInfo.label}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // Check for alerts
+        function checkAlerts(diagnoses) {
+            const diagnosesText = diagnoses.join(' ').toLowerCase();
+            const alertBanner = document.getElementById('alertBanner');
+            const alertText = document.getElementById('alertText');
+            
+            if (diagnosesText.includes('pregnancy') && diagnosesText.includes('smok')) {
+                alertBanner.style.display = 'flex';
+                alertBanner.className = 'alert-banner';
+                alertText.textContent = 'CRITICAL: High-Risk Pregnancy (Smoker) - Immediate Cessation Counseling Required';
+            } else if (diagnosesText.includes('pregnancy') || diagnosesText.includes('pregnant')) {
+                alertBanner.style.display = 'flex';
+                alertBanner.className = 'alert-banner warning';
+                alertText.textContent = 'WARNING: Pregnancy detected. Review medications for contraindications.';
+            } else {
+                alertBanner.style.display = 'none';
+            }
+        }
+
+        // Fetch AI summary
+        async function fetchAISummary(data) {
+            const summaryBox = document.getElementById('aiPatientSummary');
+            const container = document.getElementById('aiContentArea');
+            let summaryApplied = false;
+            let summaryData = null;
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8001/api/patient/by_name?firstname=${data.firstname}&lastname=${data.lastname}`);
+                
+                if (response.ok) {
+                    const patient = await response.json();
+                    const summaryResponse = await fetch(`http://127.0.0.1:8001/api/patient/${patient.id}/summary`);
+                    
+                    if (summaryResponse.ok) {
+                        summaryData = await summaryResponse.json();
+
+                        // Display cache age/freshness indicator
+                        if (summaryData.cached) {
+                            const ageMinutes = Math.floor(summaryData.age_seconds / 60);
+                            const ageDisplay = ageMinutes < 60 ? 
+                                `${ageMinutes} min${ageMinutes !== 1 ? 's' : ''} ago` : 
+                                `${Math.floor(ageMinutes / 60)} hour${Math.floor(ageMinutes / 60) !== 1 ? 's' : ''} ago`;
+                            
+                            const freshnessIndicator = document.createElement('div');
+                            freshnessIndicator.id = 'summaryFreshness';
+                            freshnessIndicator.style.cssText = 'background: #e8f5e9; border: 1px solid #4caf50; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; color: #2e7d32; display: flex; justify-content: space-between; align-items: center;';
+                            freshnessIndicator.innerHTML = `
+                                <span>✓ Last updated: ${ageDisplay}</span>
+                                ${summaryData.is_stale ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Refreshing...</span>' : ''}
+                            `;
+                            
+                            // Insert at top of summary
+                            if (summaryBox.firstChild) {
+                                summaryBox.insertBefore(freshnessIndicator, summaryBox.firstChild);
+                            } else {
+                                summaryBox.appendChild(freshnessIndicator);
+                            }
+
+                            // Trigger background refresh if stale
+                            if (summaryData.is_stale) {
+                                console.log('🔄 Summary is stale, triggering background refresh...');
+                                setTimeout(async () => {
+                                    try {
+                                        await fetch(`http://127.0.0.1:8001/api/patient/${patient.id}/summary?force_refresh=true`);
+                                        console.log('✅ Background refresh completed');
+                                        // Update freshness indicator
+                                        const indicator = document.getElementById('summaryFreshness');
+                                        if (indicator) {
+                                            indicator.innerHTML = '<span style=\"color: #2e7d32;\">✓ Just updated</span>';
+                                            indicator.style.background = '#e8f5e9';
+                                        }
+                                    } catch (err) {
+                                        console.error('Background refresh failed:', err);
+                                    }
+                                }, 100); // Slight delay to not block UI
+                            }
+                        }
+
+                        if (summaryData.patient_data) {
+                            const labOrders = summaryData.patient_data.lab_orders || summaryData.patient_data.lab_results || [];
+                            currentLabOrders = Array.isArray(labOrders) ? labOrders : [];
+                        }
+
+                        const s = summaryData.ai_summary;
+                        
+                        if (s && !s.error) {
+                            // Store citations globally
+                            if (s.citations) {
+                                currentCitations = s.citations;
+                            }
+
+                            // A. Problem Representation
+                            if (s.problem_representation) {
+                                summaryBox.innerHTML = `
+                                    <div style="background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                        <div style="color: #1565c0; font-weight: 600; margin-bottom: 8px;">👤 Problem Representation</div>
+                                        <p style="font-size: 13px; line-height: 1.6; margin: 0;">${renderTextWithCitations(s.problem_representation, s.citations)}</p>
+                                    </div>
+                                `;
+                                summaryApplied = true;
+                            }
+
+                            // B. Clinical Trajectory
+                            if (s.clinical_trajectory) {
+                                const trajectoryHtml = `
+                                    <div style="background: white; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                        <div style="color: #424242; font-weight: 600; margin-bottom: 8px;">📈 Clinical Trajectory</div>
+                                        <p style="font-size: 13px; color: #444; margin: 0;">${renderTextWithCitations(s.clinical_trajectory, s.citations)}</p>
+                                    </div>
+                                `;
+                                summaryBox.innerHTML += trajectoryHtml;
+                            }
+
+                            // C. Vitals Trends (conditional charting)
+                            if (s.vitals_trends && s.vitals_trends.length > 0) {
+                                // Check for hypertension in diagnoses
+                                const diagnoses = Array.isArray(data.diagnoses) ? data.diagnoses.join(' ').toLowerCase() : '';
+                                const hasHypertension = diagnoses.includes('hypertension') || diagnoses.includes('htn');
+                                if (hasHypertension) {
+                                    // Filter for BP and pulse vitals only
+                                    const bpPulseVitals = s.vitals_trends.filter(v => {
+                                        const metric = (v.metric || '').toLowerCase();
+                                        return metric.includes('blood pressure') || metric.includes('bp') || metric.includes('pulse') || metric.includes('heart rate');
+                                    });
+                                    if (bpPulseVitals.length > 0) {
+                                        summaryBox.innerHTML += renderVitalsTrends(bpPulseVitals, true);
+                                    }
+                                } else {
+                                    // Show all vitals in compact tray (no charts)
+                                    summaryBox.innerHTML += renderVitalsTrends(s.vitals_trends, false);
+                                }
+                            }
+
+                            // D. Lab Trends (Simplified)
+                            if (s.lab_trends && s.lab_trends.length > 0) {
+                                summaryBox.innerHTML += renderLabTrends(s.lab_trends);
+                            }
+                            
+                            // E. Red Flags (Critical Alerts)
+                            if (s.red_flags && s.red_flags.length > 0) {
+                                let flags = s.red_flags.map(f => sanitizeText(f)).join("<br>");
+                                const alertContainer = document.getElementById('alertBanner');
+                                const alertText = document.getElementById('alertText');
+                                if (alertContainer && alertText) {
+                                    alertContainer.style.display = 'flex';
+                                    alertContainer.className = 'alert-banner';
+                                    alertText.innerHTML = `<strong>⚠️ ACTIVE RISKS</strong><br>${flags}`;
+                                }
+                            }
+
+                            // Store medication evolution for sidebar
+                            if (s.medication_evolution && s.medication_evolution.length > 0) {
+                                window.currentMedicationEvolution = s.medication_evolution;
+                            }
+                        }
+
+                        // Legacy support for old format
+                        if (!summaryApplied && s && s.patient_status) {
+                            summaryBox.textContent = s.patient_status;
+                            summaryApplied = true;
+                        }
+                        
+        // Update medications
+        renderSummaryMedications(summaryData, data.medications || []);
+        
+        // Update lab displays
+        updateLabTrends(currentLabOrders);
+        renderLabResultsTables(currentLabOrders);                        // Fetch drug risk assessment
+                        if (patient.id) {
+                            await fetchDrugRiskAssessment(patient.id);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('AI summary not available:', error);
+            }
+
+            if (!summaryApplied && summaryBox) {
+                // Check if we're in the initial "awaiting patient" state
+                if (data.firstname === 'Awaiting' && data.lastname === 'patient update') {
+                    summaryBox.innerHTML = `
+                        <div style="text-align: center; color: #666; padding: 40px 20px;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">⏳</div>
+                            <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Awaiting Patient Update</div>
+                            <div style="font-size: 13px; color: #999;">Export a patient from the EHR to begin AI analysis</div>
+                        </div>
+                    `;
+                } else {
+                    const age = calculateAge(data.dob);
+                    const gender = 'F'; // Would come from patient data
+                    const conditions = data.diagnoses.map(d => d.replace('DX:', '').split('(')[0].trim());
+                    summaryBox.textContent = `${age}yo ${gender} with ${conditions.slice(0, 3).join(', ')}. Patient under active monitoring and treatment.`;
+                }
+            }
+
+            if (!summaryData) {
+                renderSummaryMedications(null, data.medications || []);
+                // Update lab displays
+                updateLabTrends(currentLabOrders);
+                renderLabResultsTables(currentLabOrders);
+            }
+        }
+
+        function renderSummaryMedications(summaryData, fallbackMedications) {
+            const container = document.getElementById('aiMedicationList');
+            const badge = document.getElementById('aiMedicationMeta');
+            if (!container || !badge) {
+                return;
+            }
+
+            // Show only medication evolution context if available
+            if (window.currentMedicationEvolution && window.currentMedicationEvolution.length > 0) {
+                const items = window.currentMedicationEvolution.map(m => `<li style="margin-bottom: 6px; font-size: 13px;">${sanitizeText(m)}</li>`).join('');
+                const evolutionHtml = `
+                    <div style="background: #f5f5f5; border-left: 3px solid #2196F3; padding: 12px; border-radius: 4px;">
+                        <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px; font-size: 13px;">💊 Treatment Evolution</div>
+                        <ul style="padding-left: 20px; margin: 0;">${items}</ul>
+                    </div>
+                `;
+                container.innerHTML = evolutionHtml;
+                badge.textContent = `${window.currentMedicationEvolution.length} changes`;
+                return;
+            }
+
+            // Fallback if no evolution data
+            container.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">No medication evolution data available.</div>';
+            badge.textContent = '--';
+        }
+
+        function sanitizeText(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            const temp = document.createElement('div');
+            temp.textContent = String(value);
+            return temp.innerHTML;
+        }
+
+        // Render Vitals Trends with charts
+        function renderVitalsTrends(vitals, showGraphs = true) {
+            if (!vitals || vitals.length === 0) return '';
+            
+            let html = `
+                <div style="background: white; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="color: #424242; font-weight: 600; margin-bottom: 10px;">💓 Vital Signs Trends</div>
+            `;
+            
+            // Check if we have historical data (values array) or just current values
+            const hasHistoricalData = vitals.some(v => v.values && Array.isArray(v.values) && v.values.length > 1);
+            
+            if (hasHistoricalData && showGraphs) {
+                // Render with charts for historical data
+                vitals.forEach((vital, index) => {
+                    const canvasId = `vitalChart${index}`;
+                    const interpretation = vital.interpretation || vital.status || '';
+                    
+                    html += `
+                        <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">${sanitizeText(vital.metric)}</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">${sanitizeText(interpretation)}</div>
+                            <canvas id="${canvasId}" style="max-height: 150px;"></canvas>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                
+                // Render charts after DOM update
+                setTimeout(() => {
+                    vitals.forEach((vital, index) => {
+                        renderTrendChart(`vitalChart${index}`, vital);
+                    });
+                }, 100);
+            } else {
+                // Render simple grid for current values only
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">`;
+                
+                vitals.forEach(vital => {
+                    const status = vital.status || vital.interpretation || '';
+                    const value = vital.latest_value || (vital.values && vital.values.length > 0 ? vital.values[vital.values.length - 1].value : 'N/A');
+                    const statusColor = status.toLowerCase().includes('elevated') || status.toLowerCase().includes('high') ? '#e74c3c' : 
+                                      status.toLowerCase().includes('normal') || status.toLowerCase().includes('controlled') ? '#27ae60' : '#f39c12';
+                                      
+                    html += `
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid ${statusColor};">
+                            <div style="font-size: 11px; color: #7f8c8d; margin-bottom: 4px;">${sanitizeText(vital.metric)}</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 4px;">${sanitizeText(value)}</div>
+                            <div style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${sanitizeText(status)}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+            
+            return html;
+        }
+
+        // Render Lab Trends with charts
+        function renderLabTrends(labs, showGraphs = true) {
+            if (!labs || labs.length === 0) return '';
+            
+            let html = `
+                <div style="background: white; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="color: #424242; font-weight: 600; margin-bottom: 10px;">🧪 Lab Trends</div>
+            `;
+            
+            // Check if we have historical data (values array)
+            const hasHistoricalData = labs.some(l => l.values && Array.isArray(l.values) && l.values.length > 1);
+            
+            if (hasHistoricalData && showGraphs) {
+                // Group by system if available
+                const systems = [...new Set(labs.map(l => l.system).filter(Boolean))];
+                
+                if (systems.length > 0) {
+                    systems.forEach(system => {
+                        const systemLabs = labs.filter(l => l.system === system);
+                        html += `
+                            <div style="margin-bottom: 20px;">
+                                <div style="font-weight: 600; color: #1976D2; margin-bottom: 10px; font-size: 14px;">${sanitizeText(system)}</div>
+                        `;
+                        
+                        systemLabs.forEach((lab, index) => {
+                            const canvasId = `labChart_${system}_${index}`;
+                            const interpretation = lab.interpretation || lab.status || '';
+                            
+                            html += `
+                                <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px; color: #2c3e50;">${sanitizeText(lab.metric)}</div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">${sanitizeText(interpretation)}</div>
+                                    <canvas id="${canvasId}" style="max-height: 150px;"></canvas>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div>`;
+                        
+                        // Render charts after DOM update
+                        setTimeout(() => {
+                            systemLabs.forEach((lab, index) => {
+                                renderTrendChart(`labChart_${system}_${index}`, lab);
+                            });
+                        }, 100);
+                    });
+                } else {
+                    // No system grouping, render all labs with charts
+                    labs.forEach((lab, index) => {
+                        const canvasId = `labChart${index}`;
+                        const interpretation = lab.interpretation || lab.status || '';
+                        
+                        html += `
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+                                <div style="font-weight: 600; margin-bottom: 4px; color: #2c3e50;">${sanitizeText(lab.metric)}</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">${sanitizeText(interpretation)}</div>
+                                <canvas id="${canvasId}" style="max-height: 150px;"></canvas>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`;
+                    
+                    // Render charts after DOM update
+                    setTimeout(() => {
+                        labs.forEach((lab, index) => {
+                            renderTrendChart(`labChart${index}`, lab);
+                        });
+                    }, 100);
+                }
+            } else {
+                // Render simple grid for current values only
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">`;
+                
+                labs.forEach(lab => {
+                    const isCritical = lab.critical === true;
+                    const status = lab.status || lab.interpretation || '';
+                    const value = lab.latest_value || (lab.values && lab.values.length > 0 ? lab.values[lab.values.length - 1].value : 'N/A');
+                    const statusColor = isCritical ? '#e74c3c' : 
+                                      status.toLowerCase().includes('normal') || status.toLowerCase().includes('improving') ? '#27ae60' : '#f39c12';
+                                      
+                    html += `
+                        <div style="background: ${isCritical ? '#ffe5e5' : '#f8f9fa'}; padding: 12px; border-radius: 6px; border-left: 3px solid ${statusColor};">
+                            ${isCritical ? '<div style="color: #e74c3c; font-size: 10px; font-weight: 600; margin-bottom: 4px;">⚠️ CRITICAL</div>' : ''}
+                            <div style="font-size: 11px; color: #7f8c8d; margin-bottom: 4px;">${sanitizeText(lab.metric)}</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 4px;">${sanitizeText(value)}</div>
+                            <div style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${sanitizeText(status)}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+            
+            return html;
+        }
+
+        // Render Chart.js line graph for trend data
+        function renderTrendChart(canvasId, trendData) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || !trendData.values || trendData.values.length === 0) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Determine color based on interpretation
+            let lineColor = '#2196F3'; // default blue
+            const interp = (trendData.interpretation || '').toLowerCase();
+            if (interp.includes('improv') || interp.includes('better') || interp.includes('decreas') && (interp.includes('pressure') || interp.includes('glucose'))) {
+                lineColor = '#4CAF50'; // green
+            } else if (interp.includes('worsen') || interp.includes('worse') || interp.includes('increas') && (interp.includes('pressure') || interp.includes('glucose'))) {
+                lineColor = '#F44336'; // red
+            }
+            
+            const labels = trendData.values.map(v => v.date || '');
+            const data = trendData.values.map(v => parseFloat(v.value) || 0);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: trendData.metric,
+                        data: data,
+                        borderColor: lineColor,
+                        backgroundColor: lineColor + '20',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 9
+                                },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPrescriptionCard(rx) {
+            const pick = (obj, keys) => {
+                for (const key of keys) {
+                    if (obj && obj[key]) {
+                        return obj[key];
+                    }
+                }
+                return null;
+            };
+
+            const name = pick(rx, ['medication_name', 'medicationName', 'name', 'drug_name', 'item_name']);
+            const dosage = pick(rx, ['dosage', 'dose', 'strength', 'sig']);
+            const frequency = pick(rx, ['frequency', 'route', 'schedule']);
+            const duration = pick(rx, ['duration', 'supply']);
+            const startedRaw = pick(rx, ['start_date', 'started_at', 'created_at', 'prescribed_on']);
+            const notes = pick(rx, ['instructions', 'notes']);
+
+            const started = formatDisplayDate(startedRaw);
+
+            const metaParts = [];
+            if (frequency) metaParts.push({ label: 'Frequency', value: frequency });
+            if (duration) metaParts.push({ label: 'Planned', value: duration });
+            if (started) metaParts.push({ label: 'Started', value: started });
+            if (notes) metaParts.push({ label: 'Notes', value: notes });
+
+            const safeName = sanitizeText(name || 'Medication');
+            const safeDosage = sanitizeText(dosage || 'Dose not recorded');
+            const metaHtml = metaParts.length
+                ? `<div class="med-meta">${metaParts.map(part => `<span>${sanitizeText(part.label)}: ${sanitizeText(part.value)}</span>`).join('')}</div>`
+                : '';
+
+            return `
+                <div class="medication-item">
+                    <div class="med-icon">💊</div>
+                    <div class="med-content">
+                        <div class="med-name">${safeName}</div>
+                        <div class="med-dosage">${safeDosage}</div>
+                        ${metaHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSummaryMedicationString(entry) {
+            const text = sanitizeText(typeof entry === 'string' ? entry : JSON.stringify(entry));
+            return `
+                <div class="medication-item">
+                    <div class="med-icon">💊</div>
+                    <div class="med-content">
+                        <div class="med-name">${text}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFallbackMedicationString(raw) {
+            const clean = (typeof raw === 'string' ? raw : '').replace(/^RX:\s*/i, '').trim();
+            const parts = clean.split('|').map(part => part.trim()).filter(Boolean);
+            const name = parts.shift() || clean;
+            const details = parts.length ? parts.join(' • ') : '';
+            const safeName = sanitizeText(name);
+            const safeDetails = sanitizeText(details);
+
+            return `
+                <div class="medication-item">
+                    <div class="med-icon">💊</div>
+                    <div class="med-content">
+                        <div class="med-name">${safeName}</div>
+                        ${details ? `<div class="med-dosage">${safeDetails}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDisplayDate(value) {
+            if (!value) {
+                return null;
+            }
+
+            const parsed = parseLabDate(value) || new Date(value);
+            if (!parsed || Number.isNaN(parsed.getTime())) {
+                return null;
+            }
+
+            return parsed.toLocaleDateString();
+        }
+
+        // Update lab trends with enhanced comparison and visualization
+        function updateLabTrends(labOrders) {
+            const labGrid = document.getElementById('labTrendGrid');
+            const timelineContainer = document.getElementById('labChartsContainer');
+
+            if (!labGrid || !timelineContainer) {
+                return;
+            }
+
+            if (!labOrders || labOrders.length === 0) {
+                labGrid.innerHTML = '<div class="lab-mini-empty">No lab trends available.</div>';
+                timelineContainer.innerHTML = '<div class="lab-mini-empty">Lab timelines will populate when results are available.</div>';
+                return;
+            }
+
+            const groups = groupLabOrders(labOrders);
+            const labItems = [];
+            const timelines = [];
+
+            groups.forEach((orders, testName) => {
+                if (orders.length === 0) return;
+                
+                const latest = orders[0];
+                const previous = orders[1];
+                const trend = evaluateLabTrend(latest, previous);
+                
+                // Calculate percentage change if both values are numeric
+                let changePercent = '';
+                if (latest.numericValue !== null && previous && previous.numericValue !== null) {
+                    const change = ((latest.numericValue - previous.numericValue) / previous.numericValue) * 100;
+                    if (Math.abs(change) >= 1) {
+                        changePercent = `(${change > 0 ? '+' : ''}${change.toFixed(1)}%)`;
+                    }
+                }
+                
+                // Get normal range if available
+                const normalRange = getNormalRange(latest.testName);
+                const isAbnormal = isValueAbnormal(latest.numericValue, normalRange);
+                
+                labItems.push(`
+                    <div class="lab-item ${isAbnormal ? 'abnormal' : ''}">
+                        <div class="lab-header">
+                            <div class="lab-name">${latest.testName}</div>
+                            <div class="lab-trend-badge ${trend.badgeClass}">
+                                ${trend.icon} ${trend.label} ${changePercent}
+                            </div>
+                        </div>
+                        <div class="lab-values">
+                            <div class="lab-current">
+                                <strong>Current:</strong> ${formatLabResultValue(latest)}
+                                ${normalRange ? `<span class="normal-range"> (Normal: ${normalRange})</span>` : ''}
+                                <span class="lab-date">${formatLabDate(latest.resultDate || latest.orderedAt)}</span>
+                            </div>
+                            ${previous ? `
+                                <div class="lab-previous">
+                                    <strong>Previous:</strong> ${formatLabResultValue(previous)}
+                                    <span class="lab-date">${formatLabDate(previous.resultDate || previous.orderedAt)}</span>
+                                    ${calculateTimeDifference(latest, previous)}
+                                </div>
+                            ` : '<div class="lab-previous"><em>No previous result for comparison</em></div>'}
+                        </div>
+                    </div>
+                `);
+
+                // Enhanced timeline with more detailed history
+                if (orders.length > 1) {
+                    const points = orders.slice(0, 8).map((order, index) => {
+                        const isLatest = index === 0;
+                        const trendIcon = index > 0 ? getTrendIcon(order.numericValue, orders[index - 1].numericValue) : '';
+                        
+                        return `
+                            <div class="lab-timeline-point ${isLatest ? 'latest' : ''}">
+                                <div class="point-value">
+                                    ${trendIcon}
+                                    <span class="value">${formatLabResultValue(order)}</span>
+                                </div>
+                                <small class="point-date">${formatLabDate(order.resultDate || order.orderedAt)}</small>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    timelines.push(`
+                        <div class="lab-timeline">
+                            <div class="lab-timeline-title">${latest.testName} History (${orders.length} results)</div>
+                            <div class="lab-timeline-points">${points}</div>
+                        </div>
+                    `);
+                }
+            });
+
+            labGrid.innerHTML = labItems.join('') || '<div class="lab-mini-empty">No lab trends available.</div>';
+            timelineContainer.innerHTML = timelines.join('') || '<div class="lab-mini-empty">Lab timelines will populate when results are available.</div>';
+        }
+
+        // Calculate age from DOB
+        function calculateAge(dob) {
+            if (!dob || dob === '--') return 'Unknown';
+            const birthDate = new Date(dob.replace(/(\d{2})(\d{2})(\d{4})/, '$3-$2-$1'));
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // Smart Search Functions
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            performSmartSearch();
+        }
+
+        async function performSmartSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            if (!currentPatient) {
+                alert('No patient data loaded');
+                return;
+            }
+
+            const resultsCard = document.getElementById('searchResultsCard');
+            const resultsContainer = document.getElementById('searchResults');
+            const resultsTitle = document.getElementById('searchResultsTitle');
+            const resultsCount = document.getElementById('searchResultCount');
+
+            // Show loading
+            resultsCard.style.display = 'block';
+            resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+
+            // Perform search
+            const results = await searchPatientData(searchTerm, currentPatient);
+
+            // Display results
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #7f8c8d;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">No results found</div>
+                        <div style="font-size: 14px;">Try searching for lab tests, medications, diagnoses, or vitals</div>
+                    </div>
+                `;
+                resultsCount.textContent = '0';
+            } else {
+                resultsTitle.textContent = `Search Results for "${searchTerm}"`;
+                resultsCount.textContent = results.length;
+                resultsContainer.innerHTML = results.map(result => renderSearchResult(result, searchTerm)).join('');
+            }
+        }
+
+        async function searchPatientData(searchTerm, patient) {
+            const results = [];
+            const term = searchTerm.toLowerCase();
+
+            try {
+                // Fetch full patient data with visits
+                const response = await fetch(`http://127.0.0.1:8001/api/patient/${patient.id}`);
+                const fullData = await response.json();
+
+                // Search in visits
+                if (fullData.visits && fullData.visits.length > 0) {
+                    fullData.visits.forEach(visit => {
+                        // Search in vitals
+                        if (visit.vitals) {
+                            const vitalsObj = typeof visit.vitals === 'string' ? JSON.parse(visit.vitals) : visit.vitals;
+                            Object.entries(vitalsObj).forEach(([key, value]) => {
+                                if (key.toLowerCase().includes(term) || String(value).toLowerCase().includes(term)) {
+                                    results.push({
+                                        type: 'Vital Sign',
+                                        date: visit.visitDate,
+                                        content: `${key}: ${value}`,
+                                        context: `Visit on ${formatDate(visit.visitDate)}`,
+                                        matchedText: `${key}: ${value}`
+                                    });
+                                }
+                            });
+                        }
+
+                        // Search in diagnosis
+                        if (visit.diagnosis && visit.diagnosis.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Diagnosis',
+                                date: visit.visitDate,
+                                content: visit.diagnosis,
+                                context: visit.chiefComplaint || 'Visit diagnosis',
+                                matchedText: visit.diagnosis
+                            });
+                        }
+
+                        // Search in chief complaint
+                        if (visit.chiefComplaint && visit.chiefComplaint.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Chief Complaint',
+                                date: visit.visitDate,
+                                content: visit.chiefComplaint,
+                                context: `Visit on ${formatDate(visit.visitDate)}`,
+                                matchedText: visit.chiefComplaint
+                            });
+                        }
+
+                        // Search in HPI
+                        if (visit.hpi && visit.hpi.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'History',
+                                date: visit.visitDate,
+                                content: visit.hpi.substring(0, 200) + (visit.hpi.length > 200 ? '...' : ''),
+                                context: `Visit on ${formatDate(visit.visitDate)}`,
+                                matchedText: visit.hpi
+                            });
+                        }
+
+                        // Search in treatment plan
+                        if (visit.treatmentPlan && visit.treatmentPlan.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Treatment Plan',
+                                date: visit.visitDate,
+                                content: visit.treatmentPlan.substring(0, 200) + (visit.treatmentPlan.length > 200 ? '...' : ''),
+                                context: `Visit on ${formatDate(visit.visitDate)}`,
+                                matchedText: visit.treatmentPlan
+                            });
+                        }
+                    });
+                }
+
+                // Search in lab orders
+                if (currentLabOrders && currentLabOrders.length > 0) {
+                    currentLabOrders.forEach(lab => {
+                        if (lab.testName && lab.testName.toLowerCase().includes(term)) {
+                            const resultValue = formatLabResultValue(lab);
+                            if (resultValue !== 'Pending') {
+                                results.push({
+                                    type: 'Lab Result',
+                                    date: lab.resultDate || lab.orderedAt,
+                                    content: `${lab.testName}: ${resultValue}`,
+                                    context: `Lab test ordered on ${formatDate(lab.orderedAt)}`,
+                                    matchedText: `${lab.testName}: ${resultValue}`
+                                });
+                            }
+                        }
+
+                        // Search in lab result values
+                        if (lab.result && String(lab.result).toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Lab Result',
+                                date: lab.resultDate || lab.orderedAt,
+                                content: `${lab.testName}: ${formatLabResultValue(lab)}`,
+                                context: `Lab test result`,
+                                matchedText: lab.result
+                            });
+                        }
+                    });
+                }
+
+                // Search in medications (from patient record)
+                if (patient.medications) {
+                    const meds = Array.isArray(patient.medications) ? patient.medications : 
+                                 typeof patient.medications === 'string' ? JSON.parse(patient.medications) : [];
+                    
+                    meds.forEach(med => {
+                        const medStr = typeof med === 'string' ? med : JSON.stringify(med);
+                        if (medStr.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Medication',
+                                date: patient.updatedAt || patient.createdAt,
+                                content: medStr,
+                                context: 'Current medication',
+                                matchedText: medStr
+                            });
+                        }
+                    });
+                }
+
+                // Search in chronic conditions
+                if (patient.chronicConditions) {
+                    const conditions = Array.isArray(patient.chronicConditions) ? patient.chronicConditions :
+                                      typeof patient.chronicConditions === 'string' ? JSON.parse(patient.chronicConditions) : [];
+                    
+                    conditions.forEach(condition => {
+                        if (condition.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Chronic Condition',
+                                date: patient.createdAt,
+                                content: condition,
+                                context: 'Patient medical history',
+                                matchedText: condition
+                            });
+                        }
+                    });
+                }
+
+                // Search in allergies
+                if (patient.allergies) {
+                    const allergies = Array.isArray(patient.allergies) ? patient.allergies :
+                                     typeof patient.allergies === 'string' ? JSON.parse(patient.allergies) : [];
+                    
+                    allergies.forEach(allergy => {
+                        if (allergy.toLowerCase().includes(term)) {
+                            results.push({
+                                type: 'Allergy',
+                                date: patient.createdAt,
+                                content: allergy,
+                                context: 'Patient allergy',
+                                matchedText: allergy
+                            });
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+
+            // Sort by date (most recent first)
+            results.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return results;
+        }
+
+        function renderSearchResult(result, searchTerm) {
+            const highlightedContent = highlightSearchTerm(result.content, searchTerm);
+            const dateStr = formatDate(result.date);
+
+            return `
+                <div class="search-result-item">
+                    <div class="search-result-header">
+                        <span class="search-result-type">${result.type}</span>
+                        <span class="search-result-date">${dateStr}</span>
+                    </div>
+                    <div class="search-result-content">
+                        <div style="margin-bottom: 5px;">${highlightedContent}</div>
+                        <div style="color: #7f8c8d; font-size: 12px; font-style: italic;">${result.context}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function highlightSearchTerm(text, term) {
+            if (!term) return sanitizeText(text);
+            
+            const regex = new RegExp(`(${term})`, 'gi');
+            const sanitized = sanitizeText(text);
+            return sanitized.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Drug Risk Assessment Functions
+        async function fetchDrugRiskAssessment(patientId) {
+            const riskContent = document.getElementById('riskContent');
+            if (!riskContent) return;
+
+            // Show loading
+            riskContent.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing medications for interactions and risks...</div>';
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8001/api/patient/${patientId}/drug_risk_assessment`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderDrugRiskAssessment(data.assessment);
+                } else {
+                    riskContent.innerHTML = '<div class="risk-empty">Unable to load risk assessment</div>';
+                }
+            } catch (error) {
+                console.error('Drug risk assessment error:', error);
+                riskContent.innerHTML = '<div class="risk-empty">⚠️ Risk assessment unavailable</div>';
+            }
+        }
+
+        function renderDrugRiskAssessment(assessment) {
+            const riskContent = document.getElementById('riskContent');
+            if (!riskContent) return;
+
+            let html = '';
+
+            // Check if there's an error
+            if (assessment.error) {
+                html = `<div class="risk-empty">⚠️ ${assessment.error}</div>`;
+                riskContent.innerHTML = html;
+                return;
+            }
+
+            const hasInteractions = assessment.drug_interactions && assessment.drug_interactions.length > 0;
+            const hasLabEffects = assessment.drug_lab_effects && assessment.drug_lab_effects.length > 0;
+            const hasContraindications = assessment.contraindications && assessment.contraindications.length > 0;
+
+            if (!hasInteractions && !hasLabEffects && !hasContraindications) {
+                html = `
+                    <div class="risk-empty">
+                        <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">No Major Risks Detected</div>
+                        <div style="font-size: 14px;">Current medication regimen shows no significant drug-drug interactions or contraindications requiring immediate attention.</div>
+                    </div>
+                `;
+                riskContent.innerHTML = html;
+                return;
+            }
+
+            // Drug-Drug Interactions
+            if (hasInteractions) {
+                html += '<div class="risk-section-title">⚠️ Drug-Drug Interactions</div>';
+                assessment.drug_interactions.forEach(interaction => {
+                    html += `
+                        <div class="risk-alert ${interaction.risk_level}">
+                            <div class="risk-header">
+                                <div class="risk-title">${interaction.drugs.join(' + ')}</div>
+                                <span class="risk-badge ${interaction.risk_level}">${interaction.risk_level} RISK</span>
+                            </div>
+                            <div class="risk-drugs">Interaction: ${sanitizeText(interaction.interaction)}</div>
+                            <div class="risk-content">
+                                <strong>Clinical Effect:</strong> ${sanitizeText(interaction.clinical_effect)}
+                            </div>
+                            <div class="risk-recommendation">
+                                <strong>💡 Recommendation:</strong> ${sanitizeText(interaction.recommendation)}
+                            </div>
+                            <div class="risk-source">📚 Source: ${sanitizeText(interaction.source)}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Drug-Induced Lab Abnormalities
+            if (hasLabEffects) {
+                html += '<div class="risk-section-title">🧪 Drug-Induced Lab Abnormalities</div>';
+                assessment.drug_lab_effects.forEach(effect => {
+                    html += `
+                        <div class="risk-alert ${effect.risk_level}">
+                            <div class="risk-header">
+                                <div class="risk-title">${sanitizeText(effect.medication)} → ${sanitizeText(effect.lab_parameter)}</div>
+                                <span class="risk-badge ${effect.risk_level}">${effect.risk_level} RISK</span>
+                            </div>
+                            <div class="risk-drugs">Current Value: ${sanitizeText(effect.current_value)}</div>
+                            <div class="risk-content">
+                                <strong>Mechanism:</strong> ${sanitizeText(effect.mechanism)}<br>
+                                <strong>Clinical Significance:</strong> ${sanitizeText(effect.clinical_significance)}
+                            </div>
+                            <div class="risk-recommendation">
+                                <strong>💡 Recommendation:</strong> ${sanitizeText(effect.recommendation)}
+                            </div>
+                            <div class="risk-source">📚 Source: ${sanitizeText(effect.source)}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Contraindications
+            if (hasContraindications) {
+                html += '<div class="risk-section-title">🚫 Contraindications & Alerts</div>';
+                assessment.contraindications.forEach(contra => {
+                    html += `
+                        <div class="risk-alert ${contra.risk_level}">
+                            <div class="risk-header">
+                                <div class="risk-title">${sanitizeText(contra.medication)}</div>
+                                <span class="risk-badge ${contra.risk_level}">${contra.risk_level} RISK</span>
+                            </div>
+                            <div class="risk-drugs">Issue: ${sanitizeText(contra.issue)}</div>
+                            <div class="risk-content">
+                                <strong>Reason:</strong> ${sanitizeText(contra.reason)}
+                            </div>
+                            <div class="risk-recommendation">
+                                <strong>💡 Recommendation:</strong> ${sanitizeText(contra.recommendation)}
+                            </div>
+                            <div class="risk-source">📚 Source: ${sanitizeText(contra.source)}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            riskContent.innerHTML = html;
+        }
+
+        // ==========================================
+        // 🏥 MEDATIXX FORMS FUNCTIONS
+        // ==========================================
+
+        async function loadFormsCategories() {
+            try {
+                const response = await fetch('/api/medatixx/categories?limit=20');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayFormsCategories(result.data);
+                    document.getElementById('categoriesCount').textContent = result.data.length;
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById('formsCategories').innerHTML = 
+                    '<div style="text-align: center; color: #666; padding: 20px;">⚠️ Unable to load categories</div>';
+            }
+        }
+
+        function displayFormsCategories(categories) {
+            const container = document.getElementById('formsCategories');
+            const html = categories.map(cat => `
+                <div style="display: inline-block; margin: 5px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; cursor: pointer; transition: all 0.3s;"
+                     onclick="loadFormsByCategory('${cat.Kategorie}')"
+                     onmouseover="this.style.background='#e9ecef'"
+                     onmouseout="this.style.background='#f8f9fa'">
+                    <strong>${cat.Kategorie}</strong>
+                    <div style="font-size: 12px; color: #666;">${cat.KategorieLangtext}</div>
+                    <div style="font-size: 11px; color: #999;">${cat.count} forms</div>
+                </div>
+            `).join('');
+            container.innerHTML = html;
+        }
+
+        async function loadFormsByCategory(category) {
+            try {
+                const response = await fetch(`/api/medatixx/forms?category=${category}&limit=50`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayFormsResults(result.data, `Category: ${category}`);
+                    document.getElementById('formsResultsCard').style.display = 'block';
+                    document.getElementById('formsResultsCard').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error('Error loading forms by category:', error);
+            }
+        }
+
+        async function searchMedatixxForms() {
+            const searchTerm = document.getElementById('formsSearchInput').value.trim();
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/medatixx/search?q=${encodeURIComponent(searchTerm)}&limit=30`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayFormsResults(result.data, `Search: "${searchTerm}"`);
+                    document.getElementById('formsResultsCard').style.display = 'block';
+                    document.getElementById('formsResultsCard').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error('Error searching forms:', error);
+                alert('Error searching forms. Please try again.');
+            }
+        }
+
+        function quickFormSearch(term) {
+            document.getElementById('formsSearchInput').value = term;
+            searchMedatixxForms();
+        }
+
+        function displayFormsResults(forms, title) {
+            document.getElementById('formsResultsTitle').textContent = title;
+            document.getElementById('formsResultCount').textContent = forms.length;
+            
+            const container = document.getElementById('formsResults');
+            
+            if (forms.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No forms found</div>';
+                return;
+            }
+
+            const html = forms.map(form => `
+                <div style="border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 15px; padding: 15px; background: white; cursor: pointer; transition: all 0.3s;"
+                     onclick="showFormDetail(${form.Nummer})"
+                     onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'"
+                     onmouseout="this.style.boxShadow='none'">
+                    <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #2c3e50; margin-bottom: 5px;">
+                                #${form.Nummer} - ${form.Suchwort}
+                            </div>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 5px;">
+                                <span style="background: #e8f5e8; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
+                                    ${form.Kategorie}
+                                </span>
+                                ${form.KategorieLangtext}
+                            </div>
+                            ${form.Format ? `
+                                <div style="color: #888; font-size: 13px; margin-top: 8px; max-height: 40px; overflow: hidden;">
+                                    <strong>Format:</strong> ${form.Format.substring(0, 100)}${form.Format.length > 100 ? '...' : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div style="color: #3498db; font-size: 12px;">
+                            Click for details →
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        async function showFormDetail(formNumber) {
+            try {
+                const response = await fetch(`/api/medatixx/form/${formNumber}`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const form = result.data;
+                    alert(`Form Details (#${form.Nummer}):\n\nName: ${form.Suchwort}\nCategory: ${form.Kategorie} - ${form.KategorieLangtext}\nProgram: ${form.ProgrammName || 'N/A'}\n\nFormat: ${form.Format || 'N/A'}\nMask: ${form.Maske || 'N/A'}`);
+                }
+            } catch (error) {
+                console.error('Error loading form detail:', error);
+                alert('Error loading form details');
+            }
+        }
+
+        async function loadFormsStats() {
+            try {
+                const response = await fetch('/api/medatixx/stats');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayFormsStats(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('formsStats').innerHTML = 
+                    '<div style="text-align: center; color: #666; padding: 20px;">⚠️ Unable to load statistics</div>';
+            }
+        }
+
+        function displayFormsStats(stats) {
+            const container = document.getElementById('formsStats');
+            const html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #27ae60;">${stats.total_records || 0}</div>
+                        <div style="color: #666;">Total Forms</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #3498db;">${stats.categories ? stats.categories.length : 0}</div>
+                        <div style="color: #666;">Categories</div>
+                    </div>
+                </div>
+                
+                ${stats.categories && stats.categories.length > 0 ? `
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #2c3e50;">Top Categories:</h4>
+                        ${stats.categories.slice(0, 5).map(cat => `
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                                <span><strong>${cat.Kategorie}</strong> - ${cat.KategorieLangtext}</span>
+                                <span style="color: #666;">${cat.count} forms</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+            container.innerHTML = html;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start polling backend
+            setInterval(checkBackend, 1000);
+            checkBackend();
+            
+            // Load medatixx data when page loads
+            setTimeout(() => {
+                loadFormsCategories();
+                loadFormsStats();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
