@@ -1,15 +1,15 @@
-  AI-Enhanced German EHR & Clinical Summary Tool
-A "Twin Architecture" solution solving the 7.5-minute consultation challenge for German physicians.
+AI-Enhanced German EHR & Clinical Summary Tool
+- A "Twin Architecture" solution solving the 7.5-minute consultation challenge for German physicians.
 
 Overview
-In the German outpatient sector, physicians have an average of just 7.5 minutes per patient. Up to 60% of this time is lost to "desktop medicine"—navigating legacy software, searching for lab trends, and manually synthesizing years of unstructured notes.
-This project introduces the AI Summary Kit, a "Sidecar Application" that runs alongside any legacy Electronic Health Record (EHR) system. It automatically intercepts patient data via standard GDT protocols, identifies critical safety risks 
+- In the German outpatient sector, physicians have an average of just 7.5 minutes per patient. Up to 60% of this time is lost to "desktop medicine"—navigating legacy software, searching for lab trends, and manually synthesizing years of unstructured notes.
+- This project introduces the AI Summary Kit, a "Sidecar Application" that runs alongside any legacy Electronic Health Record (EHR) system. It automatically intercepts patient data via standard GDT protocols, identifies critical safety risks 
 (e.g., drug interactions), and uses Generative AI to condense complex medical histories into a 30-second structured briefing.The repository includes both a full-stack Local EHR Simulator (Node.js) to mimic legacy practice software and the AI Sidecar 
 (Python/PyWebView) that delivers the intelligence.
 
 
-The AI Summary Tool Kit (The Core Innovation)
-The heart of this project is the intelligent "Sidecar" that floats next to the doctor's main screen. It provides a real-time, context-aware summary without requiring the physician to click a single button.
+  The AI Summary Tool Kit (The Core Innovation)
+- The heart of this project is the intelligent "Sidecar" that floats next to the doctor's main screen. It provides a real-time, context-aware summary without requiring the physician to click a single button.
 
 Key Features
 1. Zero-Click Workflow:
