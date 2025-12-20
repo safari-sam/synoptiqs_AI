@@ -2980,7 +2980,6 @@ async function testAISummary() {
     
     console.log('AI functionality has been disabled');
     alert('AI functionality has been disabled.');
-    }
   } catch (error) {
     console.error('❌ AI Backend connection failed:', error);
     alert(`AI Backend connection failed: ${error.message}`);

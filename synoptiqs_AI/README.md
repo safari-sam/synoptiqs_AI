@@ -1,2 +1,0 @@
-# synoptiqs_AI
-

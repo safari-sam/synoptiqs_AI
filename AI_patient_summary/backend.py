@@ -583,11 +583,21 @@ FOUNDRY_ENDPOINT = os.getenv('FOUNDRY_ENDPOINT')
 FOUNDRY_API_VERSION = os.getenv('FOUNDRY_API_VERSION', '2024-05-01-preview')
 FOUNDRY_DEPLOYMENT_NAME = os.getenv('FOUNDRY_DEPLOYMENT_NAME', 'gpt-4o-mini')
 
-# OpenAI temporarily commented out
-# OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+# OpenAI Configuration (fallback)
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+AI_PROVIDER = os.getenv('AI_PROVIDER', 'azure').lower()
 
-# Initialize Foundry client
-if FOUNDRY_API_KEY and FOUNDRY_ENDPOINT:
+# Initialize AI client based on provider
+ai_client = None
+AI_MODEL = None
+
+if AI_PROVIDER == 'openai' and OPENAI_API_KEY:
+    from openai import OpenAI
+    ai_client = OpenAI(api_key=OPENAI_API_KEY)
+    AI_MODEL = 'gpt-4o-mini'
+    print(f"🤖 Using OpenAI - Model: {AI_MODEL}")
+    print(f"🔑 API Key configured: {OPENAI_API_KEY[:10]}...")
+elif FOUNDRY_API_KEY and FOUNDRY_ENDPOINT:
     from openai import AzureOpenAI
     ai_client = AzureOpenAI(
         api_key=FOUNDRY_API_KEY,
@@ -599,12 +609,10 @@ if FOUNDRY_API_KEY and FOUNDRY_ENDPOINT:
     print(f"🔑 API Key configured: {FOUNDRY_API_KEY[:10]}...")
     print(f"🌐 Endpoint: {FOUNDRY_ENDPOINT}")
 else:
-    ai_client = None
-    AI_MODEL = None
-    print("⚠️  No Foundry API key found")
-    print("   Required environment variables:")
-    print("   - FOUNDRY_API_KEY")
-    print("   - FOUNDRY_ENDPOINT")
+    print("⚠️  No AI API key found")
+    print("   Configure either:")
+    print("   - OPENAI_API_KEY + AI_PROVIDER=openai")
+    print("   - FOUNDRY_API_KEY + FOUNDRY_ENDPOINT")
 
 # Keep legacy variable for backward compatibility
 openai_client = ai_client
