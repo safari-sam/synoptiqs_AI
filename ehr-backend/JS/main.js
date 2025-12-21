@@ -131,11 +131,10 @@ function getLabTemplate(testName) {
   return LAB_RESULT_TEMPLATES[key] || null;
 }
 
-// Add this to your existing main.js or as a separate file
 
 
 
-// Function to update vitals display
+
 function updateVitalsDisplay(visit) {
     if (!visit.vitals_json) return;
     
@@ -171,7 +170,7 @@ function updateVitalsDisplay(visit) {
 
 
 
-// Modified updateUI function to integrate AI
+
 function updateUI(data) {
     const fullNameString = `${data.lastname}, ${data.firstname} *${data.dob}`;
     document.getElementById('pName').textContent = fullNameString;
@@ -2790,7 +2789,7 @@ async function saveReasonForVisit() {
   try {
     // Save to current visit or create a new visit record
     if (currentPatient) {
-      // Update the current patient data locally
+     
       if (!currentPatient.visitReasons) {
         currentPatient.visitReasons = [];
       }

@@ -1915,7 +1915,7 @@ def get_medatixx_form_detail(form_number: int):
 
 def start_server():
     """Run the API server"""
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
 
 if __name__ == "__main__":
     print("=" * 60)

@@ -1,0 +1,129 @@
+version: '3.8'
+
+
+services:
+  
+  
+  mysql:
+    image: mysql:8.0
+    container_name: ehr_mysql
+    
+    
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-ehr_secure_password}
+      MYSQL_DATABASE: ${DB_NAME:-ehr_app}
+    
+    
+    ports:
+      - "3306:3306"
+    
+    
+    volumes:
+      - mysql_data:/var/lib/mysql
+    
+    
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    
+    networks:
+      - ehr_network
+
+  
+  ai-backend:
+    
+    build:
+      context: ./AI_patient_summary
+      dockerfile: Dockerfile
+    
+    container_name: ai_patient_summary
+    
+    
+    environment:
+      # AI Provider
+      AI_PROVIDER: ${AI_PROVIDER:-mistral}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # Database (Notice: DB_HOST is "mysql" not "localhost"!)
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-ehr_secure_password}
+      DB_NAME: ${DB_NAME:-ehr_app}
+      
+      # File watching
+      WATCH_FOLDER: /app/ehr_exchange
+      WATCH_FILE: patient_export.gdt
+      HTML_FILE_PATH: ai-enhanced-ehr-complete.html
+    
+    
+    ports:
+      - "8001:8001"
+    
+    
+    volumes:
+      - ./AI_patient_summary:/app
+      - ehr_exchange:/app/ehr_exchange
+    
+    
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    networks:
+      - ehr_network
+
+  
+  ehr-backend:
+    build:
+      context: ./ehr-backend
+      dockerfile: Dockerfile
+    
+    container_name: ehr_backend
+    
+    environment:
+      PORT: 5000
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production}
+      NODE_ENV: development
+
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-ehr_secure_password}
+      DB_NAME: ${DB_NAME:-ehr_app}
+    
+    ports:
+      - "5000:5000"
+    
+    # Mount code and shared exchange folder
+    volumes:
+      - ./ehr-backend:/app
+      - ehr_exchange:/app/ehr_exchange
+      - /app/node_modules  # Prevent overwriting node_modules
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    networks:
+      - ehr_network
+
+
+volumes:
+  # MySQL data persists even when container stops
+  mysql_data:
+  
+  # Shared folder for BDT/GDT files between containers
+  ehr_exchange:
+
+# ==========================================
+# NETWORKS (Communication)
+# ==========================================
+networks:
+  # All services can talk to each other on this network
+  ehr_network:
+    driver: bridge
